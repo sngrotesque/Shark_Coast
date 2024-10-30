@@ -91,7 +91,7 @@ std::string wuk::Binascii::b2a_hex(std::string _buffer)
     if(_buffer.empty()) {
         return std::string();
     }
-    wByte *buffer = reinterpret_cast<wByte *>(_buffer.data());
+    wByte *buffer = reinterpret_cast<wByte *>(const_cast<char *>(_buffer.data()));
     wSize length = _buffer.size();
     char *result = nullptr;
 
@@ -108,7 +108,7 @@ std::string wuk::Binascii::a2b_hex(std::string _buffer)
     if(_buffer.empty()) {
         return std::string();
     }
-    char *buffer = _buffer.data();
+    char *buffer = const_cast<char *>(_buffer.data());
     wSize length = _buffer.size();
     wByte *result = nullptr;
 

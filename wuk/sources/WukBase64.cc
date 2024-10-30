@@ -73,7 +73,7 @@ std::string wuk::Base64::encode(std::string _buffer)
         return std::string();
     }
 
-    wByte *buffer = reinterpret_cast<wByte *>(_buffer.data());
+    wByte *buffer = reinterpret_cast<wByte *>(const_cast<char *>(_buffer.data()));
     wSize length = _buffer.size();
     char *result = nullptr;
 
