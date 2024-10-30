@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <cerrno>
 
-// 使用C++20标准，如果用户指定了20标准那就是支持20，所以不需要担心不兼容的情况。
 #ifdef WUK_STD_CPP_20
 #   include <format>
 #else
