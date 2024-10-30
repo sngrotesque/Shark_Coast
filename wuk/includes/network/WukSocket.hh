@@ -113,7 +113,7 @@ namespace wuk {
             void shutdown(const wS32 how);
             void close();
         };
-    };
+    }
 }
 
 #endif /* WUK_CPP_NET */

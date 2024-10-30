@@ -96,7 +96,7 @@ def main():
         # '-Wnon-virtual-dtor', # 警告在有多态基类的情况下，如果析构函数不是虚函数。
         '-Wredundant-decls',  # 警告冗余声明。
         # '-Wold-style-cast',   # 警告使用C风格的强制类型转换。
-        '-Wuseless-cast',     # 警告无效或无用的强制类型转换。
+        # '-Wuseless-cast',     # 警告无效或无用的强制类型转换。
         # '-Wfloat-equal',      # 警告比较浮点数是否相等。
         '-Wcast-align',       # 警告由于类型转换而导致的潜在内存对齐问题。
         '-Wpedantic',         # 启用对C++标准严格语法和语义的警告，对一些非标准的扩展和行为给出警告。

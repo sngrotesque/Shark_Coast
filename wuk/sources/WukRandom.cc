@@ -45,7 +45,7 @@ wSize wuk::Random::rand()
 wSize wuk::Random::randint(wSize min, wSize max)
 {
     max = (!(max-min+1))?(max-1):max;
-    return this->rand() % ((wSize)max - min + 1) + min;
+    return this->rand() % (max - min + 1) + min;
 }
 
 void wuk::Random::urandom(wByte *buf, wSize size)
