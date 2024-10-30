@@ -6,7 +6,7 @@ wuk::crypto::Counter::Counter()
 
 }
 
-wuk::crypto::Counter::Counter(wByte *nonce, wU32 size, wSize begin)
+wuk::crypto::Counter::Counter(const wByte *nonce, wU32 size, wSize begin)
 : counter()
 {
     if (size >= sizeof(this->counter)) {
@@ -27,7 +27,7 @@ wuk::crypto::Counter::Counter(wByte *nonce, wU32 size, wSize begin)
 
 wuk::crypto::Counter::Counter(const char *nonce, wU32 size, wSize begin)
 // Counter -> Counter(wByte *nonce, wU32 size, wSize begin)
-: Counter((wByte *)nonce, size, begin)
+: Counter(reinterpret_cast<const wByte *>(nonce), size, begin)
 {
 
 }

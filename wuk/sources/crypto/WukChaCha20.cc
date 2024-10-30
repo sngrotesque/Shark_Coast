@@ -130,7 +130,7 @@ static void ChaCha20_block_next(const wU32 in[16], wU32 out[16], wByte **keystre
 	}
 
     if(keystream != NULL) {
-        *keystream = (wByte *)out;
+        *keystream = reinterpret_cast<wByte *>(out);
 	}
 }
 
@@ -143,10 +143,10 @@ wuk::crypto::ChaCha20::ChaCha20(wByte *key, wByte *nonce, wU32 counter)
 
 void wuk::crypto::ChaCha20::init()
 {
-    this->state[ 0] = pack4((const wByte *)CHACHA20_CONSTANT + 0 * 4);
-    this->state[ 1] = pack4((const wByte *)CHACHA20_CONSTANT + 1 * 4);
-    this->state[ 2] = pack4((const wByte *)CHACHA20_CONSTANT + 2 * 4);
-    this->state[ 3] = pack4((const wByte *)CHACHA20_CONSTANT + 3 * 4);
+    this->state[ 0] = pack4(reinterpret_cast<const wByte *>(CHACHA20_CONSTANT) + 0 * 4);
+    this->state[ 1] = pack4(reinterpret_cast<const wByte *>(CHACHA20_CONSTANT) + 1 * 4);
+    this->state[ 2] = pack4(reinterpret_cast<const wByte *>(CHACHA20_CONSTANT) + 2 * 4);
+    this->state[ 3] = pack4(reinterpret_cast<const wByte *>(CHACHA20_CONSTANT) + 3 * 4);
     this->state[ 4] = pack4(this->key + 0 * 4);
     this->state[ 5] = pack4(this->key + 1 * 4);
     this->state[ 6] = pack4(this->key + 2 * 4);

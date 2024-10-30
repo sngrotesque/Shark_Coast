@@ -11,7 +11,7 @@ namespace wuk {
         public:
             wByte counter[16];
             Counter();
-            Counter(wByte *nonce, wU32 size, wSize begin);
+            Counter(const wByte *nonce, wU32 size, wSize begin);
             Counter(const char *nonce, wU32 size, wSize begin);
             Counter(std::string nonce, wSize begin);
         };

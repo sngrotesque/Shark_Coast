@@ -39,7 +39,7 @@ char *wuk::Base64::encode(const wByte *buffer, wSize &length)
     wSize src_index{0}, dst_index{0};
     wSize result_length = this->get_encode_length(length);
 
-    char *result = new (std::nothrow) char[result_length + 1];
+    char *result = static_cast<char *>(malloc(result_length + 1));
     if(!result) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Base64::encode",
             "Failed to allocate memory for result.");
@@ -113,7 +113,7 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
     bool  padding_started   = 0;
 
     wSize  bin_len  = this->get_decode_length(ascii_len);
-    wByte *bin_data = new (std::nothrow) wByte[bin_len + 1];
+    wByte *bin_data = static_cast<wByte *>(malloc(bin_len + 1));
     if(!bin_data) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Base64::decode",
             "Failed to allocate memory for bin_data.");

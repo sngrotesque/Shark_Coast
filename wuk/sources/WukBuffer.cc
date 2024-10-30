@@ -12,7 +12,7 @@ void wuk::Buffer::expand_memory(wSize length)
 {
     if (!this->data) {
         // 如果指针还未使用
-        this->data = (wByte *)malloc(length);
+        this->data = static_cast<wByte *>(malloc(length));
         if (!this->data) {
             throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::expand_memory",
                 "Failed to allocate memory for this->data.");
@@ -21,7 +21,7 @@ void wuk::Buffer::expand_memory(wSize length)
     } else {
         // 如果指针已使用
         wSize offset_value = this->data_offset - this->data;
-        wByte *tmp_ptr = (wByte *)realloc(this->data, this->data_size + length);
+        wByte *tmp_ptr = static_cast<wByte *>(realloc(this->data, this->data_size + length));
         if (!tmp_ptr) {
             throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::expand_memory",
                 "Expanding memory size failed.");
@@ -57,7 +57,7 @@ wuk::Buffer::Buffer(const wuk::Buffer &other)
 {
     wSize offset_val = other.data_offset - other.data;
 
-    this->data = (wByte *)malloc(this->data_size);
+    this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
@@ -80,7 +80,7 @@ wuk::Buffer::Buffer(wuk::Buffer &&other)
 wuk::Buffer::Buffer(const wByte *content, wSize length)
 : data(nullptr), data_offset(nullptr), data_len(length), data_size(length)
 {
-    this->data = (wByte *)malloc(this->data_len);
+    this->data = static_cast<wByte *>(malloc(this->data_len));
     if (!this->data) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
@@ -99,7 +99,7 @@ wuk::Buffer::Buffer(const std::string content)
 wuk::Buffer::Buffer(wSize memory_size)
 : data(nullptr), data_offset(nullptr), data_len(), data_size(memory_size)
 {
-    this->data = (wByte *)malloc(this->data_size);
+    this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
@@ -119,7 +119,7 @@ wuk::Buffer &wuk::Buffer::operator=(const wuk::Buffer &other)
     this->data_len = other.data_len;
     this->data_size = other.data_size;
 
-    this->data = (wByte *)malloc(this->data_size);
+    this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");

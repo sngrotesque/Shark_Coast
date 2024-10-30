@@ -148,7 +148,8 @@ wuk::net::Socket::~Socket()
 
 void wuk::net::Socket::setsockopt(int level, int optName, SocketOption opt)
 {
-    wS32 err = ::setsockopt(this->fd, level, optName, (char *)opt.val, opt.val_len);
+    wS32 err = ::setsockopt(this->fd, level, optName,
+                            static_cast<const char *>(opt.val), opt.val_len);
     if(err == WUK_NET_ERROR) {
         wuk::net::exception("wuk::net::Socket::setsockopt");
     }
@@ -156,7 +157,8 @@ void wuk::net::Socket::setsockopt(int level, int optName, SocketOption opt)
 
 void wuk::net::Socket::getsockopt(int level, int optName, SocketOption opt)
 {
-    wS32 err = ::getsockopt(this->fd, level, optName, (char *)opt.val, &opt.val_len);
+    wS32 err = ::getsockopt(this->fd, level, optName,
+                            static_cast<char *>(const_cast<void *>(opt.val)), &opt.val_len);
     if(err == WUK_NET_ERROR) {
         wuk::net::exception("wuk::net::Socket::getsockopt");
     }
@@ -237,8 +239,7 @@ wuk::net::Socket wuk::net::Socket::accept()
 
 void wuk::net::Socket::send(const std::string content, const wS32 flag)
 {
-    this->t_size = ::send(this->fd, (char *)content.c_str(),
-                                    content.size(), flag);
+    this->t_size = ::send(this->fd, content.c_str(), content.size(), flag);
 
     if(this->t_size == WUK_NET_ERROR) {
         wuk::net::exception("wuk::net::Socket::send");
@@ -270,7 +271,7 @@ void wuk::net::Socket::sendall(const std::string content, const wS32 flag)
 
 std::string wuk::net::Socket::recv(const wS32 len, const wS32 flag)
 {
-    char *buffer = new (std::nothrow) char[len];
+    char *buffer = static_cast<char *>(malloc(len));
     if(!buffer) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::net::Socket::recv",
             "Failed to allocate memory for buffer.");
@@ -307,7 +308,7 @@ void wuk::net::Socket::sendto(const std::string content, wuk::net::IPEndPoint ta
 std::string wuk::net::Socket::recvfrom(const wS32 len, SOCKADDR *from,
                                         socklen_t *fromlen, const wS32 flag)
 {
-    char *buffer = new (std::nothrow) char[len];
+    char *buffer = static_cast<char *>(malloc(len));
     if(!buffer) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::net::Socket::recvfrom",
             "Failed to allocate memory for buffer.");

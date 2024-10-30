@@ -35,7 +35,7 @@ char *wuk::Binascii::b2a_hex(const wByte *buffer, wSize &length)
             "buffer is NULL.");
     }
 
-    char *result = new (std::nothrow) char[(length << 1) + 1];
+    char *result = static_cast<char *>(malloc((length << 1) + 1));
     if(!result) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Binascii::b2a_hex",
             "Failed to allocate memory for result.");
@@ -61,7 +61,7 @@ wByte *wuk::Binascii::a2b_hex(const char *buffer, wSize &length)
         throw wuk::Exception(wukErr_Err, "wuk::Binascii::a2b_hex",
             "Odd length is not allowed.");
     }
-    wByte *result = new (std::nothrow) wByte[(length >> 1) + 1];
+    wByte *result = static_cast<wByte *>(malloc((length >> 1) + 1));
     if(!result) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Binascii::a2b_hex",
             "Failed to allocate memory for result.");

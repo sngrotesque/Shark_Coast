@@ -39,7 +39,7 @@ std::string wuk::Struct::foramt_number_option(std::vector<T> args)
 
     // 申请一个缓冲区用于存放接下来要编组的二进制数据
     wSize length = sizeof(T) * args.size();
-    char *result = new (std::nothrow) char[length];
+    char *result = static_cast<char *>(malloc(length));
     if(!result) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Struct::format_x_option",
             "Failed to allocate memory for result.");

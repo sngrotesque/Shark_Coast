@@ -83,7 +83,7 @@ std::string wuk::Random::urandom(wU32 size)
         return std::string();
     }
 
-    wByte *buf = new (std::nothrow) wByte[size];
+    wByte *buf = static_cast<wByte *>(malloc(size));
     if(!buf) {
         throw wuk::Exception(wukErr_ErrMemory, "wuk::Random::urandom",
             "Failed to allocate memory for buf.");
