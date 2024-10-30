@@ -174,10 +174,14 @@ void wuk::net::Socket::settimeout(double _val)
 #   elif defined(WUK_PLATFORM_LINUX)
     double intpart = 0;
     double fracpart = modf(this->timeout, &intpart);
+#   ifdef WUK_STD_CPP_20
     struct timeval _timeout = {
         .tv_sec  = static_cast<time_t>(intpart),
         .tv_usec = static_cast<time_t>(fracpart * 1e6)
     };
+#   else
+    struct timeval _timeout{static_cast<time_t>(intpart), static_cast<time_t>(fracpart * 1e6)};
+#   endif
 #   endif
     char *optval = reinterpret_cast<char *>(&_timeout);
 
