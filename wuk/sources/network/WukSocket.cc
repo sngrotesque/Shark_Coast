@@ -124,6 +124,8 @@ wuk::net::Socket::Socket(wS32 _family, wS32 _type, wS32 _proto, wSocket _fd)
 : timeout(), fd(), family(_family), type(_type), proto(_proto),t_size(),
 lAddr(), rAddr()
 {
+    // 如果开启`-Wuseless-cast`选项，此处会被警告，但这是针对Windows系统做的类型转换，而
+    // 如果要为了区分系统来判断转换或不转换，那么就显得有点多余了。
     if(static_cast<wI32>(_fd) == WUK_NET_ERROR) {
         this->fd = socket(this->family, this->type, this->proto);
         if(static_cast<wI32>(this->fd) == WUK_NET_ERROR) {
