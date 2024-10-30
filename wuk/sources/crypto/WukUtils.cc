@@ -1,6 +1,7 @@
 #include <crypto/WukUtils.hh>
 
 wuk::crypto::Counter::Counter()
+: counter()
 {
 
 }
@@ -8,6 +9,10 @@ wuk::crypto::Counter::Counter()
 wuk::crypto::Counter::Counter(wByte *nonce, wU32 size, wSize begin)
 : counter()
 {
+    if (size >= sizeof(this->counter)) {
+        throw wuk::Exception(wukErr_Err, "wuk::crypto::Counter::Counter",
+            "Nonce is too long.");
+    }
     memcpy(this->counter, nonce, size);
 
     this->counter[8]  |= (begin >> 56) & 0xff;

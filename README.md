@@ -61,6 +61,7 @@ A：因为我从未真正使用过`Mac OS`[^macos]，并且也不熟悉它的操
 1.  C++ standard >= `C++11`，同时尽可能避免使用`C++20`及以上标准的语法和头文件[^no_cpp20]。
 2.  对于`reinterpret_cast`[^reinterpret_cast]关键字的使用，在Windows-MingW64-VisualStudio2022和Linux-GNUC中  
     测试无问题，相当于C代码中的强制类型转换[^forced_conversion]，目前测试未发现问题，继续使用。
+3.  为避免产生混淆和误解，请在使用类的成员时加上`this->`指针，防止理解上与参数或变量混淆。
  -  代码风格：
 1.  单行不超过90个英文字符。
 2.  对于类型的初始化，只使用两种初始化方法。  

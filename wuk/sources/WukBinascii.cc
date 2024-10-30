@@ -95,11 +95,7 @@ std::string wuk::Binascii::b2a_hex(std::string _buffer)
     wSize length = _buffer.size();
     char *result = nullptr;
 
-    try {
-        result = this->b2a_hex(buffer, length);
-    } catch (std::exception &e) {
-        throw;
-    }
+    result = this->b2a_hex(buffer, length);
 
     std::string result_string{result, length};
     delete[] result;
@@ -116,11 +112,7 @@ std::string wuk::Binascii::a2b_hex(std::string _buffer)
     wSize length = _buffer.size();
     wByte *result = nullptr;
 
-    try {
-        result = this->a2b_hex(buffer, length);
-    } catch (std::exception &e) {
-        throw;
-    }
+    result = this->a2b_hex(buffer, length);
 
     std::string result_string{reinterpret_cast<char *>(result), length};
     delete[] result;

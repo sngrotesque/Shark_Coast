@@ -10,7 +10,6 @@
  */
 void wuk::Buffer::expand_memory(wSize length)
 {
-    printf("[TEST] wuk::Buffer::expand_memory: %zd\n", length);
     if (!this->data) {
         // 如果指针还未使用
         this->data = (wByte *)malloc(length);
@@ -21,8 +20,6 @@ void wuk::Buffer::expand_memory(wSize length)
         this->data_offset = this->data;
     } else {
         // 如果指针已使用
-        printf("[TEST] wuk::Buffer::expand_memory: %p\n", this->data);
-
         wSize offset_value = this->data_offset - this->data;
         wByte *tmp_ptr = (wByte *)realloc(this->data, this->data_size + length);
         if (!tmp_ptr) {
@@ -53,6 +50,31 @@ wuk::Buffer::Buffer()
 : data(nullptr), data_offset(nullptr), data_len(), data_size()
 {
     
+}
+
+wuk::Buffer::Buffer(const wuk::Buffer &other)
+: data(nullptr), data_offset(nullptr), data_len(other.data_len), data_size(other.data_size)
+{
+    wSize offset_val = other.data_offset - other.data;
+
+    this->data = (wByte *)malloc(this->data_size);
+    if (!this->data) {
+        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
+            "Failed to allocate memory for this->data.");
+    }
+    memcpy(this->data, other.data, other.data_len);
+
+    this->data_offset = this->data + offset_val;
+}
+
+wuk::Buffer::Buffer(wuk::Buffer &&other)
+: data(nullptr), data_offset(nullptr), data_len(other.data_len), data_size(other.data_size)
+{
+    this->data = other.data;
+    this->data_offset = other.data_offset;
+
+    other.data = nullptr;
+    other.data_offset = nullptr;
 }
 
 wuk::Buffer::Buffer(const wByte *content, wSize length)
@@ -88,13 +110,59 @@ wuk::Buffer::Buffer(wSize memory_size)
     this->data_offset = this->data;
 }
 
+wuk::Buffer &wuk::Buffer::operator=(const wuk::Buffer &other)
+{
+    if(this == &other) {
+        return *this;
+    }
+    free(this->data);
+    this->data_len = other.data_len;
+    this->data_size = other.data_size;
+
+    this->data = (wByte *)malloc(this->data_size);
+    if (!this->data) {
+        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::operator=",
+            "Failed to allocate memory for this->data.");
+    }
+    memcpy(this->data, other.data, other.data_len);
+    this->data_offset = this->data + (other.data_offset - other.data);
+
+    return *this;
+}
+
+wuk::Buffer &wuk::Buffer::operator=(wuk::Buffer &&other) noexcept
+{
+    if (this == &other) {
+        return *this;
+    }
+    free(this->data);
+    this->data = other.data;
+    this->data_offset = other.data_offset;
+    this->data_len = other.data_len;
+    this->data_size = other.data_size;
+
+    other.data = nullptr;
+    other.data_offset = nullptr;
+    other.data_len = 0;
+    other.data_size = 0;
+
+    return *this;
+}
+
 wuk::Buffer::~Buffer()
 {
     free(this->data);
-    this->data = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
+bool wuk::Buffer::is_empty()
+{
+    if(!this->data_len) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * @brief 在需要写入指定长度的大小的内容且同时需要指针的情况下调用此方法
  * @authors SN-Grotesque
@@ -139,22 +207,22 @@ void wuk::Buffer::append(const std::string content)
 }
 
 //////////////////////////////////////////////////////////////////////
-wByte *wuk::Buffer::get_data() const
+wByte *wuk::Buffer::get_data()
 {
     return this->data;
 }
 
-const char *wuk::Buffer::get_cStr() const
+const char *wuk::Buffer::get_cStr()
 {
     return reinterpret_cast<const char *>(this->data);
 }
 
-wSize wuk::Buffer::get_length() const
+wSize wuk::Buffer::get_length()
 {
     return this->data_len;
 }
 
-wSize wuk::Buffer::get_size() const
+wSize wuk::Buffer::get_size()
 {
     return this->data_size;
 }

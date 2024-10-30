@@ -56,6 +56,7 @@ char *wuk::Base64::encode(const wByte *buffer, wSize &length)
     switch(length % 3) {
         case 1:
             result[dst_index - 2] = BASE64PAD;
+            [[fallthrough]]; // 感到困惑请参考：https://zh.cppreference.com/w/cpp/language/attributes
         case 2:
             result[dst_index - 1] = BASE64PAD;
     }
@@ -76,11 +77,7 @@ std::string wuk::Base64::encode(std::string _buffer)
     wSize length = _buffer.size();
     char *result = nullptr;
 
-    try {
-        result = this->encode(buffer, length);
-    } catch (std::exception &e) {
-        throw;
-    }
+    result = this->encode(buffer, length);
 
     std::string _result{result, length};
     delete[] result;
@@ -234,11 +231,7 @@ std::string wuk::Base64::decode(std::string _buffer)
     wSize length = _buffer.size();
     wByte *result = nullptr;
 
-    try {
-        result = this->decode(buffer, length);
-    } catch (std::exception &e) {
-        throw;
-    }
+    result = this->decode(buffer, length);
 
     std::string _result{reinterpret_cast<char *>(result), length};
     delete[] result;

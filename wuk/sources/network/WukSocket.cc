@@ -40,7 +40,7 @@ ADDRINFO *wuk::net::Socket::get_addr_info(wS32 family, wS32 type, wS32 proto,
                                 std::string addr, std::string serviceName)
 {
     ADDRINFO *sockAddrRes = nullptr;
-    ADDRINFO hints = {0};
+    ADDRINFO hints{};
     hints.ai_family = family;
     hints.ai_socktype = type;
     hints.ai_protocol = proto;
@@ -69,7 +69,7 @@ wuk::net::IPEndPoint wuk::net::Socket::get_network_info(wSocket sockfd, wS32 fam
 {
     SOCKADDR_IN *ipv4 = nullptr;
     SOCKADDR_IN6 *ipv6 = nullptr;
-    SOCKADDR basicSockAddr{0};
+    SOCKADDR basicSockAddr{};
     socklen_t basicSockAddr_len{sizeof(basicSockAddr)};
     wuk::net::IPEndPoint addr_info;
 

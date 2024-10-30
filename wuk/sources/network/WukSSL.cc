@@ -16,13 +16,9 @@ wuk::net::SSL_Socket::SSL_Socket(SSL *_ssl, wuk::net::Socket _fd)
 
 void wuk::net::SSL_Socket::connect(const std::string addr, const wU16 port)
 {
-    try {
-        this->fd.connect(addr, port);
-        if(SSL_connect(this->ssl) != 1) {
-            wukSSL_exception("wuk::net::SSL_Socket::connect");
-        }
-    } catch (std::exception &e) {
-        throw;
+    this->fd.connect(addr, port);
+    if(SSL_connect(this->ssl) != 1) {
+        wukSSL_exception("wuk::net::SSL_Socket::connect");
     }
 }
 

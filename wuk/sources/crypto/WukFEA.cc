@@ -257,9 +257,14 @@ void wuk::crypto::FEA::key_extension(const wByte *key, const wByte *iv)
     wuk::memory_secure(ivBuffer, sizeof(this->iv));
 }
 //////////////////////////////////////////////////////////
+wuk::crypto::FEA::FEA()
+: key(), iv(), roundKey(), counter(), segmentSize(128)
+{
+    
+}
 
 wuk::crypto::FEA::FEA(const wByte *key, const wByte *iv, wuk::crypto::Counter counter, const wU32 segmentSize)
-: counter(counter), segmentSize(segmentSize), key(), iv(), roundKey()
+: key(), iv(), roundKey(), counter(counter), segmentSize(segmentSize)
 {
     if(!key || !iv) {
         throw wuk::Exception(wukErr_ErrNULL, "wuk::crypto::FEA::fea",
@@ -277,30 +282,30 @@ wuk::crypto::FEA::~FEA()
     wuk::memory_secure(this->iv, sizeof(this->iv));
 }
 
-void wuk::crypto::FEA::encrypt(wByte *content, wSize size, xcryptMode mode)
+void wuk::crypto::FEA::encrypt(wByte *content, wSize size, mode mode)
 {
     switch(mode) {
-        case xcryptMode::ECB:
+        case mode::ECB:
             this->cipher(content, this->roundKey); break;
-        case xcryptMode::CBC:
+        case mode::CBC:
             this->cbc_encrypt(content, size); break;
-        case xcryptMode::CTR:
+        case mode::CTR:
             this->ctr_xcrypt(content, size); break;
-        case xcryptMode::CFB:
+        case mode::CFB:
             this->cfb_encrypt(content, size, this->segmentSize); break;
     }
 }
 
-void wuk::crypto::FEA::decrypt(wByte *content, wSize size, xcryptMode mode)
+void wuk::crypto::FEA::decrypt(wByte *content, wSize size, mode mode)
 {
     switch(mode) {
-        case xcryptMode::ECB:
+        case mode::ECB:
             this->inv_cipher(content, this->roundKey); break;
-        case xcryptMode::CBC:
+        case mode::CBC:
             this->cbc_decrypt(content, size); break;
-        case xcryptMode::CTR:
+        case mode::CTR:
             this->ctr_xcrypt(content, size); break;
-        case xcryptMode::CFB:
+        case mode::CFB:
             this->cfb_decrypt(content, size, this->segmentSize); break;
     }
 }

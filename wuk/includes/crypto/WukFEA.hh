@@ -16,11 +16,12 @@
 
 namespace wuk {
     namespace crypto {
-        enum class xcryptMode {
+        enum class mode {
             ECB,  // Electronic Codebook
             CBC,  // Cipher block chaining
             CFB,  // Cipher feedback
-            CTR}; // Counter
+            CTR   // Counter
+        };
 
         /*
         * 此算法，使用任意加密模式的情况下，即使提供了对应模式所需的数据，也不能缺失IV。
@@ -33,48 +34,49 @@ namespace wuk {
         * 当然，你在使用CTR模式的情况下，自然也可以不加入Nonce，同样可以正常加/解密，但是吧，密文的安全性，由你自己保证。
         */
         class LIBWUK_API FEA {
-            private:
-                wuk::crypto::Counter counter;
-                wU32 segmentSize;
+        private:
+            wByte key[WUK_FEA_BL << 1];
+            wByte iv[WUK_FEA_BL];
+            wByte roundKey[sizeof(key) * WUK_FEA_NR];
 
-                void sub_bytes(wByte *block);
-                void shift_bits(wByte *block);
+            wuk::crypto::Counter counter;
+            wU32 segmentSize;
 
-                void inv_sub_bytes(wByte *block);
-                void inv_shift_bits(wByte *block);
+            void sub_bytes(wByte *block);
+            void shift_bits(wByte *block);
 
-                void shift_rows(wByte *block);
-                void inv_shift_rows(wByte *block);
+            void inv_sub_bytes(wByte *block);
+            void inv_shift_bits(wByte *block);
 
-                void xor_with_iv(wByte *block, wByte *iv);
+            void shift_rows(wByte *block);
+            void inv_shift_rows(wByte *block);
 
-                void cipher(wByte *p, wByte *roundKey);
-                void inv_cipher(wByte *c, wByte *roundKey);
+            void xor_with_iv(wByte *block, wByte *iv);
 
-                void key_extension(const wByte *key, const wByte *iv);
+            void cipher(wByte *p, wByte *roundKey);
+            void inv_cipher(wByte *c, wByte *roundKey);
 
-                void ecb_encrypt(wByte *p);
-                void ecb_decrypt(wByte *c);
+            void key_extension(const wByte *key, const wByte *iv);
 
-                void cbc_encrypt(wByte *p, wSize n);
-                void cbc_decrypt(wByte *c, wSize n);
+            void ecb_encrypt(wByte *p);
+            void ecb_decrypt(wByte *c);
 
-                void ctr_xcrypt(wByte *d, wSize n);
+            void cbc_encrypt(wByte *p, wSize n);
+            void cbc_decrypt(wByte *c, wSize n);
 
-                void cfb_encrypt(wByte *p, wSize n, wU32 segmentSize);
-                void cfb_decrypt(wByte *c, wSize n, wU32 segmentSize);
+            void ctr_xcrypt(wByte *d, wSize n);
 
-            public:
-                wByte key[WUK_FEA_BL << 1];
-                wByte iv[WUK_FEA_BL];
-                wByte roundKey[sizeof(key) * WUK_FEA_NR];
+            void cfb_encrypt(wByte *p, wSize n, wU32 segmentSize);
+            void cfb_decrypt(wByte *c, wSize n, wU32 segmentSize);
 
-                FEA() {}
-                // 不是哥们？为什么不为counter添加一个参数默认值？
-                FEA(const wByte *key, const wByte *iv, wuk::crypto::Counter counter = {}, const wU32 segmentSize = 128);
-                ~FEA();
-                void encrypt(wByte *content, wSize size, xcryptMode mode);
-                void decrypt(wByte *content, wSize size, xcryptMode mode);
+        public:
+            FEA();
+            FEA(const wByte *key, const wByte *iv,
+                wuk::crypto::Counter counter = {},
+                const wU32 segmentSize = 128);
+            ~FEA();
+            void encrypt(wByte *content, wSize size, mode mode);
+            void decrypt(wByte *content, wSize size, mode mode);
         };
     }
 }

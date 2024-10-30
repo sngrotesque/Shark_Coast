@@ -89,11 +89,7 @@ std::string wuk::Random::urandom(wU32 size)
             "Failed to allocate memory for buf.");
     }
 
-    try {
-        this->urandom(buf, size);
-    } catch(std::exception &e) {
-        throw;
-    }
+    this->urandom(buf, size);
 
     std::string result(reinterpret_cast<char *>(buf), size);
     delete[] buf;

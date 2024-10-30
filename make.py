@@ -1,4 +1,5 @@
 import subprocess
+import logging
 import time
 import sys
 import re
@@ -19,15 +20,10 @@ def create_output_filename(in_path :str):
 
     match_statement = rf'\.[{"|".join(c_cpp_filename)}]+'
 
-    output_fn = None
-    if sys.platform == 'win32':
-        output_fn = re.sub(match_statement, r'.exe', full_filename)
-    else:
-        output_fn = re.sub(match_statement, r'', full_filename)
+    output_fn = re.sub(match_statement, r'.exe', full_filename) \
+        if sys.platform == 'win32' else re.sub(match_statement, r'', full_filename)
 
-    if extensions_filename == 'c':
-        return output_fn, 'gcc'
-    return output_fn, 'g++'
+    return output_fn, 'gcc' if extensions_filename == 'c' else 'g++'
 
 class compile:
     def __init__(self, source_file_path :str, user_args :list):
@@ -41,7 +37,13 @@ class compile:
         self.user_args = user_args
 
     def __run_command(self, cmd :str):
-        return subprocess.call(cmd, shell=True)
+        # return subprocess.call(cmd, shell=True)
+        try:
+            result = subprocess.run(cmd, shell = True, check = True)
+            return result.returncode
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Command \'{cmd}\' failed with return code {e.returncode}')
+            sys.exit(e.returncode)
 
     # 合并GCC参数
     def merge_parameter(self):
@@ -64,35 +66,58 @@ class compile:
         self.output_path = os.path.join(output_folder, output_filename)
         build_command = f'{compile_program} {self.source_path} {args} -o {self.output_path}'
 
-        print(f'程序编译开始，完整指令为：{COLOR}{build_command}{RESET}')
+        logging.info(f'程序编译开始，完整指令为：{COLOR}{build_command}{RESET}')
         compile_err_code = self.__run_command(build_command)
         if compile_err_code:
-            exit(f'编译程序时出现了错误，返回的错误代码为：{compile_err_code}')
+            sys.exit(f'编译程序时出现了错误，返回的错误代码为：{compile_err_code}')
 
     def run(self):
-        print(f'程序编译完成，程序路径为：{COLOR}{self.output_path}{RESET}')
+        logging.info(f'程序编译完成，程序路径为：{COLOR}{self.output_path}{RESET}')
         self.__run_command(self.output_path)
 
 def main():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
     if len(sys.argv) < 2:
-        exit(f'Too few parameters: {COLOR}{sys.argv[0]}{RESET} {COLOR}[src_file, [parameter]]{RESET}')
+        sys.exit(f'Too few parameters: {COLOR}{sys.argv[0]}{RESET} {COLOR}[src_file, [parameter]]{RESET}')
 
-    cmp = compile(sys.argv[1], sys.argv[2:])
+    comp = compile(sys.argv[1], sys.argv[2:])
 
-    cmp.add_parameter('-I wuk/includes')
-    cmp.add_parameter('-I wuk/sources')
+    compile_params = (
+        '-I wuk/includes',
+        '-I wuk/sources',
 
-    # 通用包含代码
-    cmp.add_parameter('wuk/sources/config/WukException.cc')
-    cmp.add_parameter('wuk/sources/WukMemory.cc')
+        # 必要包含的源代码文件
+        'wuk/sources/config/WukException.cc',
+        'wuk/sources/WukMemory.cc',
+
+        '-O3',                # 优化级别：3（最高级别）
+        '-Wsuggest-override', # 建议使用override关键词来确保派生类中的虚函数覆盖基类的虚函数。
+        # '-Wnon-virtual-dtor', # 警告在有多态基类的情况下，如果析构函数不是虚函数。
+        '-Wredundant-decls',  # 警告冗余声明。
+        # '-Wold-style-cast',   # 警告使用C风格的强制类型转换。
+        '-Wuseless-cast',     # 警告无效或无用的强制类型转换。
+        # '-Wfloat-equal',      # 警告比较浮点数是否相等。
+        '-Wcast-align',       # 警告由于类型转换而导致的潜在内存对齐问题。
+        '-Wpedantic',         # 启用对C++标准严格语法和语义的警告，对一些非标准的扩展和行为给出警告。
+        # '-Wshadow',           # 警告变量被隐藏（如在内层作用域中定义了同名变量）。
+        '-Wformat',           # 警告与printf和scanf格式字符串相关的问题。
+        # '-Wundef',            # 警告未定义的宏。
+        '-Wextra',            # 用于-Wall未显示的额外的警告，帮助发现代码中可能存在的问题。
+        '-Werror',            # 将所有警告视为错误，这样可以确保你的代码在没有警告的情况下编译。
+        '-Wall',              # 显示绝大多数错误和警告。
+    )
+
+    for param in compile_params:
+        comp.add_parameter(param)
 
     start = time.time()
-    cmp.build()
+    comp.build()
     stop = time.time()
 
-    print(f'构建所用时间：{stop-start:.2f}秒。')
+    logging.info(f'构建所用时间：{stop-start:.2f}秒。')
 
-    cmp.run()
+    comp.run()
 
 if __name__ == '__main__':
     color_table = {

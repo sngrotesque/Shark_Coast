@@ -2,6 +2,10 @@
 
 This document is about where I am looking for references. Basically, these libraries are designed based on official documents.
 
+Reference standards:
+1. [C++ 11](https://zh.cppreference.com/w/cpp/11)
+2. [ISO C++ 11](https://isocpp.org/wiki/faq/cpp11)
+
 ----
 
 ### [Library](includes/config/wuk.hpp)

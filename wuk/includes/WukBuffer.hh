@@ -13,12 +13,16 @@
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 
-// 后续考虑是否将`wByte *data`改为`std::vector<wByte>`。
+/**
+ * @brief 缓冲区类
+ * @authors SN-Grotesque
+ * @note 请实现！拷贝构造函数！和！移动构造函数！！！！！！！！
+ */
 namespace wuk {
     class LIBWUK_API Buffer {
     private:
         wByte *data;
-        wByte *data_offset; // 在当前已申请空间的情况下写入数据时使用
+        wByte *data_offset; // 在当前已申请空间的情况下写入数据时使用（指向数据末端用于追加写入）
 
         wSize data_len;     // 代表实际长度
         wSize data_size;    // 代表已申请的内存空间长度
@@ -31,17 +35,29 @@ namespace wuk {
     public:
         // 默认构造函数
         Buffer();
+        // 拷贝构造函数
+        Buffer(const wuk::Buffer &other);
+        // 移动构造函数
+        Buffer(wuk::Buffer &&other);
         // 给予数据的构造函数
-        Buffer(const wByte *content, wSize length);
+        explicit Buffer(const wByte *content, wSize length);
         // 兼容std::string
-        Buffer(const std::string content);
+        explicit Buffer(const std::string content);
         // 申请指定大小内存空间备用的构造函数
-        Buffer(wSize memory_size);
+        explicit Buffer(wSize memory_size);
+
+        // 拷贝赋值运算符
+        wuk::Buffer &operator=(const wuk::Buffer &other);
+        // 移动赋值运算符
+        wuk::Buffer &operator=(wuk::Buffer &&other) noexcept;
+
+        // 析构函数
         ~Buffer();
 
+        // 判断是否为空
+        bool is_empty();
         // 在需要写入指定长度的大小的内容且同时需要指针的情况下调用此方法
         wByte *append_write(wSize length);
-
         // 追加写入，可用于直接追加和已申请空间的情况下
         void append(const wByte *content, wSize length);
         void append(const std::string content);
@@ -51,10 +67,10 @@ namespace wuk {
         // 尝试性实现了+和+=，出现了一个奇怪的BUG，打算后续重新实现了
 
         // 属性
-        wByte *get_data() const;
-        const char *get_cStr() const;
-        wSize get_length() const;
-        wSize get_size() const;
+        wByte *get_data();
+        const char *get_cStr();
+        wSize get_length();
+        wSize get_size();
     };
 }
 
