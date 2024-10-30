@@ -1,5 +1,7 @@
 # The wizard's universal key
 
+**在未阅读完此文档且有异议的情况下请不要参与此代码库的编写。**
+
  - [作者 / Authors](#authors)
  - [开放源代码许可 / OpenSource license](#开放源代码许可open-source-license)
  - [提问与解答 / Q&A](#提问与解答qa)
