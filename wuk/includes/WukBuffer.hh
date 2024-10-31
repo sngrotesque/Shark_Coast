@@ -4,7 +4,6 @@
  *    必须要将`data_offset`指针置于`data`之后，偏移长度为传入的数据的长度。
  * 2. 在任何时候，`data_offset`指向地址都不应该比`data`小，但是是否有必要增加一个判断，还有待商榷。
  */
-
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
@@ -13,11 +12,6 @@
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 
-/**
- * @brief 缓冲区类
- * @authors SN-Grotesque
- * @note 请实现！拷贝构造函数！和！移动构造函数！！！！！！！！
- */
 namespace wuk {
     class LIBWUK_API Buffer {
     private:
@@ -33,23 +27,25 @@ namespace wuk {
         bool is_memory_sufficient(wSize length);
 
     public:
-        // 默认构造函数
+        // 构造函数
         Buffer();
-        // 拷贝构造函数
         Buffer(const wuk::Buffer &other);
-        // 移动构造函数
         Buffer(wuk::Buffer &&other);
-        // 给予数据的构造函数
-        explicit Buffer(const wByte *content, wSize length);
-        // 兼容std::string
-        explicit Buffer(const std::string content);
-        // 申请指定大小内存空间备用的构造函数
-        explicit Buffer(wSize memory_size);
 
         // 拷贝赋值运算符
         wuk::Buffer &operator=(const wuk::Buffer &other);
         // 移动赋值运算符
         wuk::Buffer &operator=(wuk::Buffer &&other) noexcept;
+
+        // 兼容std::string
+        Buffer(const std::string &content);
+        wuk::Buffer &operator=(const std::string &other_string);
+        wuk::Buffer &operator=(std::string &&other_string);
+
+        // 给予数据的构造函数
+        Buffer(const wByte *content, wSize length);
+        // 申请指定大小内存空间备用的构造函数
+        Buffer(wSize memory_size);
 
         // 析构函数
         ~Buffer();
