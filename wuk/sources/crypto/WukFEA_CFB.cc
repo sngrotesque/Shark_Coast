@@ -3,7 +3,7 @@
 void wuk::crypto::FEA::cfb_encrypt(wByte *p, wSize n, wU32 segmentSize)
 {
     if(segmentSize & 7) {
-        throw wuk::Exception(wukErr_Err, "wuk::crypto::FEA::cfb_encrypt",
+        throw wuk::Exception(wuk::Error::ERR, "wuk::crypto::FEA::cfb_encrypt",
                                     "The segment size is not a multiple of 8.");
     }
     wSize i, j;
@@ -25,7 +25,7 @@ void wuk::crypto::FEA::cfb_encrypt(wByte *p, wSize n, wU32 segmentSize)
 void wuk::crypto::FEA::cfb_decrypt(wByte *c, wSize n, wU32 segmentSize)
 {
     if(segmentSize & 7) {
-        throw wuk::Exception(wukErr_Err, "wuk::crypto::FEA::cfb_encrypt",
+        throw wuk::Exception(wuk::Error::ERR, "wuk::crypto::FEA::cfb_encrypt",
                                     "The segment size is not a multiple of 8.");
     }
     wSize i, j;

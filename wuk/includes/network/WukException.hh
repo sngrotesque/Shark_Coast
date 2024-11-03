@@ -259,7 +259,7 @@
 
 namespace wuk {
     namespace net {
-        LIBWUK_API void exception(std::string funcName);
+        LIBWUK_API void exception(const char *funcName);
     }
 }
 

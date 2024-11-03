@@ -3,7 +3,6 @@
 #if WUK_SUPPORT
 #ifndef WUK_CPP_PACKET
 #define WUK_CPP_PACKET
-
 #include <config/WukException.hh>
 #include <network/WukSocket.hh>
 

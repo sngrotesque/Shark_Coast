@@ -267,7 +267,7 @@ wuk::crypto::FEA::FEA(const wByte *key, const wByte *iv, wuk::crypto::Counter co
 : key(), iv(), roundKey(), counter(counter), segmentSize(segmentSize)
 {
     if(!key || !iv) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::crypto::FEA::fea",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::crypto::FEA::fea",
                                         "key or iv is NULL.");
     }
     memcpy(this->key, key, sizeof(this->key));

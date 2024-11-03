@@ -1,11 +1,11 @@
 #include <network/WukSSL.hh>
 
-void wukSSL_exception(std::string funcName)
+void wukSSL_exception(const char *funcName)
 {
     wU32 err_code = ERR_get_error();
     char err_msg[256]{};
     ERR_error_string(err_code, err_msg);
-    throw wuk::Exception(err_code, funcName, err_msg);
+    throw wuk::Exception(static_cast<wuk::Error>(err_code), funcName, err_msg);
 }
 
 wuk::net::SSL_Socket::SSL_Socket(SSL *_ssl, wuk::net::Socket _fd)
@@ -37,7 +37,7 @@ std::string wuk::net::SSL_Socket::recv(const wS32 length)
 {
     char *buffer = static_cast<char *>(malloc(length));
     if(!buffer) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::net::SSL_Socket::recv",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::net::SSL_Socket::recv",
             "Failed to allocate memory for buffer.");
     }
 
@@ -47,7 +47,7 @@ std::string wuk::net::SSL_Socket::recv(const wS32 length)
     }
 
     std::string result{buffer, (wSize)this->transmissionLength};
-    delete[] buffer;
+    free(buffer);
     return result;
 }
 

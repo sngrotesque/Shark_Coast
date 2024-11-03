@@ -31,13 +31,13 @@ wByte wuk::Binascii::to_bot(wByte c)
 char *wuk::Binascii::b2a_hex(const wByte *buffer, wSize &length)
 {
     if(!buffer || !length) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::Binascii::b2a_hex",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Binascii::b2a_hex",
             "buffer is NULL.");
     }
 
     char *result = static_cast<char *>(malloc((length << 1) + 1));
     if(!result) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Binascii::b2a_hex",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Binascii::b2a_hex",
             "Failed to allocate memory for result.");
     }
     *(result + (length << 1)) = 0x00;
@@ -54,16 +54,16 @@ char *wuk::Binascii::b2a_hex(const wByte *buffer, wSize &length)
 wByte *wuk::Binascii::a2b_hex(const char *buffer, wSize &length)
 {
     if(!buffer || !length) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::Binascii::a2b_hex",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Binascii::a2b_hex",
             "buffer is NULL.");
     }
     if(length & 1) {
-        throw wuk::Exception(wukErr_Err, "wuk::Binascii::a2b_hex",
+        throw wuk::Exception(wuk::Error::ERR, "wuk::Binascii::a2b_hex",
             "Odd length is not allowed.");
     }
     wByte *result = static_cast<wByte *>(malloc((length >> 1) + 1));
     if(!result) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Binascii::a2b_hex",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Binascii::a2b_hex",
             "Failed to allocate memory for result.");
     }
     const wByte *buffer_p = reinterpret_cast<const wByte *>(buffer);
@@ -75,8 +75,8 @@ wByte *wuk::Binascii::a2b_hex(const char *buffer, wSize &length)
         top = hexTable[*(buffer_p + bi)];
         bot = hexTable[*(buffer_p + (bi + 1))];
         if((top == 31) || (bot == 31)) {
-            delete[] result;
-            throw wuk::Exception(wukErr_Err, "wuk::Binascii::a2b_hex",
+            free(result);
+            throw wuk::Exception(wuk::Error::ERR, "wuk::Binascii::a2b_hex",
                 "characters must be from 0 to f.");
         }
         *(result + ri) = (top << 4) + bot;
@@ -98,7 +98,7 @@ std::string wuk::Binascii::b2a_hex(std::string _buffer)
     result = this->b2a_hex(buffer, length);
 
     std::string result_string{result, length};
-    delete[] result;
+    free(result);
 
     return result_string;
 }
@@ -115,7 +115,7 @@ std::string wuk::Binascii::a2b_hex(std::string _buffer)
     result = this->a2b_hex(buffer, length);
 
     std::string result_string{reinterpret_cast<char *>(result), length};
-    delete[] result;
+    free(result);
 
     return result_string;
 }

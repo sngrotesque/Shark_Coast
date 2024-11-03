@@ -2,7 +2,7 @@
 
 #define CASE_ERR(x) msg = (x); break
 
-void wuk::net::exception(std::string funcName)
+void wuk::net::exception(const char *funcName)
 {
 #   if defined(WUK_PLATFORM_WINOS)
     wS32 err = WSAGetLastError();
@@ -145,5 +145,5 @@ void wuk::net::exception(std::string funcName)
                     CASE_ERR("unknown error");
             }
     }
-    throw wuk::Exception(err, funcName, msg);
+    throw wuk::Exception(static_cast<wuk::Error>(err), funcName, msg);
 }

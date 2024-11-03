@@ -10,8 +10,8 @@ wuk::crypto::Counter::Counter(const wByte *nonce, wU32 size, wSize begin)
 : counter()
 {
     if (size >= sizeof(this->counter)) {
-        throw wuk::Exception(wukErr_Err, "wuk::crypto::Counter::Counter",
-            "Nonce is too long.");
+        throw wuk::Exception(wuk::Error::ERR, "wuk::crypto::Counter::Counter",
+                            "Nonce is too long.");
     }
     memcpy(this->counter, nonce, size);
 

@@ -18,7 +18,7 @@ wuk::net::SocketOption::SocketOption(const void *val, socklen_t val_len)
 : val(val), val_len(val_len)
 {
     if(!this->val) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::net::SocketOption::SocketOption",
+        throw wuk::Exception(wuk::Error::ERR, "wuk::net::SocketOption::SocketOption",
             "val is nullptr.");
     }
 }
@@ -279,19 +279,19 @@ std::string wuk::net::Socket::recv(const wS32 len, const wS32 flag)
 {
     char *buffer = static_cast<char *>(malloc(len));
     if(!buffer) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::net::Socket::recv",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::net::Socket::recv",
             "Failed to allocate memory for buffer.");
     }
 
     this->t_size = ::recv(this->fd, buffer, len, flag);
     if(this->t_size == WUK_NET_ERROR) {
-        delete[] buffer;
+        free(buffer);
         wuk::net::exception("wuk::net::Socket::recv");
     }
 
     std::string content{buffer, static_cast<wSize>(this->t_size)};
 
-    delete[] buffer;
+    free(buffer);
     return content;
 }
 
@@ -316,19 +316,19 @@ std::string wuk::net::Socket::recvfrom(const wS32 len, SOCKADDR *from,
 {
     char *buffer = static_cast<char *>(malloc(len));
     if(!buffer) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::net::Socket::recvfrom",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::net::Socket::recvfrom",
             "Failed to allocate memory for buffer.");
     }
 
     this->t_size = ::recvfrom(this->fd, buffer, len, flag, from, fromlen);
     if(this->t_size == WUK_NET_ERROR) {
-        delete[] buffer;
+        free(buffer);
         exception("wuk::net::Socket::recvfrom");
     }
 
     std::string content(buffer, this->t_size);
 
-    delete[] buffer;
+    free(buffer);
     return content;
 }
 

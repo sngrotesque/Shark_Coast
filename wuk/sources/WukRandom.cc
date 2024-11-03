@@ -51,27 +51,27 @@ wSize wuk::Random::randint(wSize min, wSize max)
 void wuk::Random::urandom(wByte *buf, wSize size)
 {
     if(!buf || !size) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::Random::urandom",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Random::urandom",
                                         "buf or size is NULL.");
     }
 
 #   if defined(WUK_PLATFORM_WINOS)
     HCRYPTPROV hProv;
     if(!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0)) {
-        throw wuk::Exception(wukErr_ErrSysFunc, "wuk::Random::urandom",
+        throw wuk::Exception(static_cast<wuk::Error>(GetLastError()), "wuk::Random::urandom",
             "CryptAcquireContext function returned an error code when called.");
     }
     if(!CryptGenRandom(hProv, size, buf)) {
-        throw wuk::Exception(wukErr_ErrSysFunc, "wuk::Random::urandom",
+        throw wuk::Exception(static_cast<wuk::Error>(GetLastError()), "wuk::Random::urandom",
             "CryptGenRandom function returned an error code when called.");
     }
     if(!CryptReleaseContext(hProv, 0)) {
-        throw wuk::Exception(wukErr_ErrSysFunc, "wuk::Random::urandom",
+        throw wuk::Exception(static_cast<wuk::Error>(GetLastError()), "wuk::Random::urandom",
             "CryptReleaseContext function returned an error code when called.");
     }
 #   elif defined(WUK_PLATFORM_LINUX)
-    if(getrandom(buf, size, GRND_RANDOM) == wukErr_Err) {
-        throw wuk::Exception(wukErr_ErrSysFunc, "wuk::Random::urandom",
+    if(getrandom(buf, size, GRND_RANDOM) == EOF) {
+        throw wuk::Exception(errno, "wuk::Random::urandom",
             "getrandom function returned an error code when called.");
     }
 #   endif
@@ -85,14 +85,14 @@ std::string wuk::Random::urandom(wU32 size)
 
     wByte *buf = static_cast<wByte *>(malloc(size));
     if(!buf) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Random::urandom",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Random::urandom",
             "Failed to allocate memory for buf.");
     }
 
     this->urandom(buf, size);
 
     std::string result(reinterpret_cast<char *>(buf), size);
-    delete[] buf;
+    free(buf);
 
     return result;
 }

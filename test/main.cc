@@ -100,7 +100,7 @@ namespace CryptoCipher {
 
             wByte *ciphertext = (wByte *)malloc(length);
             if(!ciphertext) {
-                throw wuk::Exception(wukErr_Err, "FEA_test::encrypt",
+                throw wuk::Exception(wuk::Error::ERR, "FEA_test::encrypt",
                     "failed to alloc for ciphertext.");
             }
             memcpy(ciphertext, plaintext, length);

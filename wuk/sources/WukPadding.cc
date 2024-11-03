@@ -3,7 +3,7 @@
 void wuk::pad(wByte *src, wSize &size, wU32 blockSize, bool randVal)
 {
     if(!src) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::pad", "src is NULL.");
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::pad", "src is NULL.");
     }
     wU32 padLen;
     wSize totalLen;
@@ -25,7 +25,7 @@ void wuk::pad(wByte *src, wSize &size, wU32 blockSize, bool randVal)
 void wuk::unpad(wByte *src, wSize &size)
 {
     if(!src) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::pad", "src is NULL.");
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::pad", "src is NULL.");
     }
     wSize padLen;
     wSize index;
@@ -41,7 +41,7 @@ void wuk::unpad(wByte *src, wSize &size)
 wByte *wuk::pkcs7_pad(const wByte *src, wSize &size, wU32 blockSize)
 {
     if(!src) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::pkcs7_pad", "src is NULL.");
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::pkcs7_pad", "src is NULL.");
     }
     wU32 padLen;
     wSize totalLen;
@@ -61,7 +61,7 @@ wByte *wuk::pkcs7_pad(const wByte *src, wSize &size, wU32 blockSize)
 wByte *wuk::pkcs7_unpad(const wByte *src, wSize &size)
 {
     if(!src) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::pkcs7_unpad", "src is NULL.");
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::pkcs7_unpad", "src is NULL.");
     }
     wU32 padLen = src[size - 1];
     wSize unpaddedLen = size - padLen;

@@ -33,7 +33,7 @@ wSize wuk::Base64::get_encode_length(wSize length)
 char *wuk::Base64::encode(const wByte *buffer, wSize &length)
 {
     if(!buffer || !length) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::Base64::encode",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Base64::encode",
             "buffer is NULL.");
     }
     wSize src_index{0}, dst_index{0};
@@ -41,7 +41,7 @@ char *wuk::Base64::encode(const wByte *buffer, wSize &length)
 
     char *result = static_cast<char *>(malloc(result_length + 1));
     if(!result) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Base64::encode",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Base64::encode",
             "Failed to allocate memory for result.");
     }
 
@@ -80,7 +80,7 @@ std::string wuk::Base64::encode(std::string _buffer)
     result = this->encode(buffer, length);
 
     std::string _result{result, length};
-    delete[] result;
+    free(result);
 
     return _result;
 }
@@ -115,7 +115,7 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
     wSize  bin_len  = this->get_decode_length(ascii_len);
     wByte *bin_data = static_cast<wByte *>(malloc(bin_len + 1));
     if(!bin_data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Base64::decode",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Base64::decode",
             "Failed to allocate memory for bin_data.");
     }
     wByte *bin_data_start = bin_data;
@@ -212,8 +212,8 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
         }
     }
 error_end:
-    delete[] bin_data_start;
-    throw wuk::Exception(wukErr_Err, "wuk::Base64::decode", error_message);
+    free(bin_data_start);
+    throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode", error_message.c_str());
 
 done:
     length = bin_data - bin_data_start;
@@ -234,7 +234,7 @@ std::string wuk::Base64::decode(std::string _buffer)
     result = this->decode(buffer, length);
 
     std::string _result{reinterpret_cast<char *>(result), length};
-    delete[] result;
+    free(result);
 
     return _result;
 }

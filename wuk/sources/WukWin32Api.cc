@@ -6,7 +6,7 @@ struct wuk::winapi::widthHeight wuk::winapi::get_screen_resolution()
     size.width = GetSystemMetrics(SM_CXSCREEN);
     size.height = GetSystemMetrics(SM_CYSCREEN);
     if(!size.width || !size.height) {
-        throw wuk::Exception(wukErr_Err, "wuk::winapi::get_screen_resolution",
+        throw wuk::Exception(wuk::Error::ERR, "wuk::winapi::get_screen_resolution",
             "GetSystemMetrics function returned an error code when called.");
     }
 }
@@ -16,7 +16,7 @@ struct wuk::winapi::widthHeight wuk::winapi::get_cursor_pos()
     wuk::winapi::widthHeight point;
     POINT _point_tmp = {0};
     if(!GetCursorPos(&_point_tmp)) {
-        throw wuk::Exception(GetLastError(), "wuk::winapi::get_cursor_pos",
+        throw wuk::Exception(static_cast<wuk::Error>(GetLastError()), "wuk::winapi::get_cursor_pos",
             "GetCursorPos function returned an error code when called.");
     }
     point.width = _point_tmp.x;
@@ -41,7 +41,7 @@ std::string wuk::winapi::get_username(char format = 'A')
 void wuk::winapi::set_cursor_pos(wU32 x, wU32 y)
 {
     if(!SetCursorPos(x, y)) {
-        throw wuk::Exception(wukErr_ErrSysFunc, "wuk::winapi::set_cursor_pos",
+        throw wuk::Exception(static_cast<wuk::Error>(GetLastError()), "wuk::winapi::set_cursor_pos",
             "SetCursorPos function returned an error code when called.");
     }
 }

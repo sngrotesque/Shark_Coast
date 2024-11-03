@@ -14,7 +14,7 @@ void wuk::Buffer::expand_memory(wSize length)
         // 如果指针还未使用
         this->data = static_cast<wByte *>(malloc(length));
         if (!this->data) {
-            throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::expand_memory",
+            throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::expand_memory",
                 "Failed to allocate memory for this->data.");
         }
         this->data_offset = this->data;
@@ -23,7 +23,7 @@ void wuk::Buffer::expand_memory(wSize length)
         wSize offset_value = this->data_offset - this->data;
         wByte *tmp_ptr = static_cast<wByte *>(realloc(this->data, this->data_size + length));
         if (!tmp_ptr) {
-            throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::expand_memory",
+            throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::expand_memory",
                 "Expanding memory size failed.");
         }
         this->data = tmp_ptr;
@@ -31,6 +31,18 @@ void wuk::Buffer::expand_memory(wSize length)
     }
 
     this->data_size += length;
+}
+
+/**
+ * @brief 用于减少可用内存大小
+ * @authors SN-Grotesque
+ * @note 不需要在函数外部重新分配this->data_size大小，此方法会自动完成
+ * @param length 需要减少的长度（非总长度），比如要减16字节，就传入16。
+ * @return 无
+ */
+void wuk::Buffer::shrink_memory(wSize length)
+{
+    
 }
 
 /**
@@ -59,7 +71,7 @@ wuk::Buffer::Buffer(const wuk::Buffer &other)
 
     this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
     }
     memcpy(this->data, other.data, other.data_len);
@@ -88,7 +100,7 @@ wuk::Buffer &wuk::Buffer::operator=(const wuk::Buffer &other)
 
     this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::operator=",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");
     }
     memcpy(this->data, other.data, other.data_len);
@@ -131,7 +143,7 @@ wuk::Buffer &wuk::Buffer::operator=(const std::string &other_string)
 
     this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::operator=",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");
     }
     memcpy(this->data, other_string.c_str(), this->data_len);
@@ -149,7 +161,7 @@ wuk::Buffer &wuk::Buffer::operator=(std::string &&other_string)
 
     this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::operator=",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");
     }
     memcpy(this->data, other_string.c_str(), this->data_len);
@@ -163,7 +175,7 @@ wuk::Buffer::Buffer(const wByte *content, wSize length)
 {
     this->data = static_cast<wByte *>(malloc(this->data_len));
     if (!this->data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
     }
     memcpy(this->data, content, length);
@@ -176,7 +188,7 @@ wuk::Buffer::Buffer(wSize memory_size)
 {
     this->data = static_cast<wByte *>(malloc(this->data_size));
     if (!this->data) {
-        throw wuk::Exception(wukErr_ErrMemory, "wuk::Buffer::Buffer",
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
     }
 
@@ -219,7 +231,7 @@ wByte *wuk::Buffer::append_write(wSize length)
 void wuk::Buffer::append(const wByte *content, wSize length)
 {
     if(!content) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::Buffer::append",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Buffer::append",
             "content in nullptr.");
     }
 
@@ -239,8 +251,13 @@ void wuk::Buffer::append(const std::string content)
                 content.size());
 }
 
+void wuk::Buffer::shrink_to_fit()
+{
+    
+}
+
 //////////////////////////////////////////////////////////////////////
-wByte *wuk::Buffer::get_data()
+const wByte *wuk::Buffer::get_data() const
 {
     return this->data;
 }

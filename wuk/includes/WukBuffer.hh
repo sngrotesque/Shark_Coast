@@ -23,6 +23,8 @@ namespace wuk {
 
         // 用于增加可用内存大小
         void expand_memory(wSize length);
+        // 用于减少可用内存大小
+        void shrink_memory(wSize length); // 未实现
         // 检查当前已申请的内存空间是否足够
         bool is_memory_sufficient(wSize length);
 
@@ -62,8 +64,11 @@ namespace wuk {
         // void append(const wuk::Buffer buffer);
         // 尝试性实现了+和+=，出现了一个奇怪的BUG，打算后续重新实现了
 
+        // 将占用的内存空间与实际使用的内存空间保持同步（防止无意义的内存占用）
+        void shrink_to_fit(); // 未实现
+
         // 属性
-        wByte *get_data();
+        const wByte *get_data() const;
         const char *get_cStr();
         wSize get_length();
         wSize get_size();

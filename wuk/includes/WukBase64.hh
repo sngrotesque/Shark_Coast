@@ -5,6 +5,7 @@
 #define WUK_BASE64_CPP
 #include <config/WukException.hh>
 #include <WukMemory.hh>
+#include <WukBuffer.hh>
 
 namespace wuk {
     class LIBWUK_API Base64 {
@@ -18,6 +19,9 @@ namespace wuk {
 
         std::string encode(std::string buffer);
         std::string decode(std::string buffer);
+
+        wuk::Buffer encode(wuk::Buffer buffer);
+        wuk::Buffer decode(wuk::Buffer buffer);
     };
 }
 

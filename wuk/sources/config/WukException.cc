@@ -13,13 +13,18 @@
 * };
 */
 
-wuk::Exception::Exception(wS32 code, std::string function, std::string message)
+std::string get_message(wuk::Error code, const char *f, const char *m)
 {
 #   ifdef WUK_STD_CPP_20
-    this->output_message = std::format("{0}[{1}]: {2}", function, code, message);
+    return std::format("{0}[{1}]: {2}", f, code, m);
 #   else
-    this->output_message = function + "[" + std::to_string(code) + "]: " + message;
+    return std::string{f} + "[" + std::to_string(code) + "]: " + m;
 #   endif
+}
+
+wuk::Exception::Exception(wuk::Error code, const char *function, const char *message)
+{
+    this->output_message = get_message(code, function, message);
 }
 
 const char *wuk::Exception::what() const noexcept

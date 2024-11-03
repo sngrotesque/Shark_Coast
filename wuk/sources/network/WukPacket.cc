@@ -97,12 +97,12 @@ template <typename T>
 void wuk::net::PacketEndian::write_bytearray(wByte *array, wSize array_size, T val)
 {
     if (!array) {
-        throw wuk::Exception(wukErr_ErrNULL, "wuk::net::PacketEndian::write_bytearray",
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::net::PacketEndian::write_bytearray",
             "array is nullptr.");
     }
     
     if (sizeof(T) > array_size) {
-        throw wuk::Exception(wukErr_Err, "wuk::net::PacketEndian::write_bytearray",
+        throw wuk::Exception(wuk::Error::ERR, "wuk::net::PacketEndian::write_bytearray",
             "The data size exceeds the size of the array.");
     }
 
