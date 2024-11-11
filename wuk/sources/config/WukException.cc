@@ -16,9 +16,9 @@
 std::string get_message(wuk::Error code, const char *f, const char *m)
 {
 #   ifdef WUK_STD_CPP_20
-    return std::format("{0}[{1}]: {2}", f, code, m);
+    return std::format("{0}[{1}]: {2}", f, static_cast<wI32>(code), m);
 #   else
-    return std::string{f} + "[" + std::to_string(code) + "]: " + m;
+    return std::string{f} + "[" + std::to_string(static_cast<wI32>(code)) + "]: " + m;
 #   endif
 }
 

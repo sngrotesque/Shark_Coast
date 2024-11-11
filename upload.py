@@ -30,8 +30,9 @@ class git_process:
         if os.path.exists('.git'):
             self.path.remove('.git')
         if os.path.exists(self.compiled_path):
-            self.path.remove('_compiled')
-        # self.path.remove('upload.py')
+            self.path.remove(self.compiled_path)
+        if os.path.exists('misc'):
+            self.path.remove('misc')
 
     def view(self):
         print(f'>>>> +---------- 现有文件(BEGIN) ----------+')
