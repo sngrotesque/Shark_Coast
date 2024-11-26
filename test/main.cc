@@ -134,7 +134,9 @@ void test()
 
         fea.encrypt(plaintext, plaintext_length, mode);
 
-    } catch (exception &e) {
+    } catch (wuk::Exception &e) {
+        cout << e.what() << endl;
+    } catch (std::exception &e) {
         cout << e.what() << endl;
     }
 }

@@ -1,5 +1,6 @@
 #include <WukWin32Api.hh>
 
+#ifdef WUK_PLATFORM_WINOS
 /*
 #include <windows.h>
 #include <Wininet.h>
@@ -30,22 +31,6 @@ bool SetWallpaper(const std::wstring& file, DWORD style) {
     return true;
 }
 */
-
-// void wuk::winapi::set_desktop_wallpaper(const std::wstring &path)
-// {
-//     bool succ = SystemParametersInfoW(
-//         SPI_SETDESKWALLPAPER,
-//         0,
-//         nullptr,
-//         SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE
-//     );
-
-//     if (!succ) {
-//         throw wuk::Exception(static_cast<wuk::Error>(GetLastError()),
-//             "wuk::winapi::set_desktop_wallpaper",
-//             "SetCursorPos function returned an error code when called.");
-//     }
-// }
 
 void wuk::WinApi::get_error() noexcept
 {
@@ -137,3 +122,35 @@ void wuk::WinApi::set_wallpaper(T path) const noexcept
         SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE
     );
 }
+
+void opacityStartMenu(BYTE bAlpha)
+{
+    HWND handle = FindWindowW(L"Windows.UI.Core.CoreWindow", L"启动");
+    // HWND handle = FindWindowW(L"UnrealWindow", L"卡拉彼丘  ");
+    if(!handle) {
+        throw wuk::Exception(wuk::Error::ERR, "opacityStartMenu",
+            "The handle was not found. Please check the window name.");
+    }
+
+    if(!SetWindowLongW(handle, GWL_EXSTYLE, GetWindowLongW(handle, GWL_EXSTYLE) | WS_EX_LAYERED)) {
+        throw wuk::Exception(wuk::Error::ERR, "opacityStartMenu",
+            "SetWindowLongW function returned an error code when called.");
+    }
+    if(!SetLayeredWindowAttributes(handle, 0, bAlpha, LWA_ALPHA)) {
+        throw wuk::Exception(wuk::Error::ERR, "opacityStartMenu",
+            "SetLayeredWindowAttributes function returned an error code when called.");
+    }
+}
+
+template <typename T>
+void wuk::WinApi::set_window_opacity(T class_name, T window_name, BYTE bAlpha)
+{
+    // using TYPE = std::conditional_t<std::is_same_v<T, std::string>, TCHAR, WCHAR>;
+    // HWND handle = nullptr;
+
+
+    // if constexpr (std::is_same_v<T, std::string>) {
+        
+    // }
+}
+#endif

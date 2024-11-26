@@ -39,7 +39,7 @@ char *wuk::Base64::encode(const wByte *buffer, wSize &length)
     wSize src_index{0}, dst_index{0};
     wSize result_length = this->get_encode_length(length);
 
-    char *result = static_cast<char *>(malloc(result_length + 1));
+    char *result = wuk::m_alloc<char *>(result_length + 1);
     if(!result) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Base64::encode",
             "Failed to allocate memory for result.");
@@ -75,12 +75,10 @@ std::string wuk::Base64::encode(std::string _buffer)
 
     wByte *buffer = reinterpret_cast<wByte *>(const_cast<char *>(_buffer.data()));
     wSize length = _buffer.size();
-    char *result = nullptr;
-
-    result = this->encode(buffer, length);
+    char *result = this->encode(buffer, length);
 
     std::string _result{result, length};
-    free(result);
+    wuk::m_free(result);
 
     return _result;
 }
@@ -113,7 +111,7 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
     bool  padding_started   = 0;
 
     wSize  bin_len  = this->get_decode_length(ascii_len);
-    wByte *bin_data = static_cast<wByte *>(malloc(bin_len + 1));
+    wByte *bin_data = wuk::m_alloc<wByte *>(bin_len + 1);
     if(!bin_data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Base64::decode",
             "Failed to allocate memory for bin_data.");
@@ -212,7 +210,7 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
         }
     }
 error_end:
-    free(bin_data_start);
+    wuk::m_free(bin_data_start);
     throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode", error_message.c_str());
 
 done:
@@ -229,12 +227,10 @@ std::string wuk::Base64::decode(std::string _buffer)
 
     const char *buffer = _buffer.c_str();
     wSize length = _buffer.size();
-    wByte *result = nullptr;
-
-    result = this->decode(buffer, length);
+    wByte *result = this->decode(buffer, length);
 
     std::string _result{reinterpret_cast<char *>(result), length};
-    free(result);
+    wuk::m_free(result);
 
     return _result;
 }

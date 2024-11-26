@@ -8,12 +8,16 @@
 namespace wuk {
     namespace crypto {
         class LIBWUK_API Counter {
-        public:
+        private:
             wByte counter[16];
+
+        public:
             Counter();
             Counter(const wByte *nonce, wU32 size, wSize begin);
             Counter(const char *nonce, wU32 size, wSize begin);
             Counter(std::string nonce, wSize begin);
+
+            wByte *get() noexcept;
         };
     }
 }

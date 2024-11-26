@@ -35,7 +35,7 @@ void wuk::net::SSL_Socket::send(const std::string content)
 
 std::string wuk::net::SSL_Socket::recv(const wS32 length)
 {
-    char *buffer = static_cast<char *>(malloc(length));
+    char *buffer = wuk::m_alloc<char *>(length);
     if(!buffer) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::net::SSL_Socket::recv",
             "Failed to allocate memory for buffer.");
@@ -47,7 +47,7 @@ std::string wuk::net::SSL_Socket::recv(const wS32 length)
     }
 
     std::string result{buffer, (wSize)this->transmissionLength};
-    free(buffer);
+    wuk::m_free(buffer);
     return result;
 }
 

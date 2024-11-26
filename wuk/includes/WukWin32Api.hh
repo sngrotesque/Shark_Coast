@@ -1,5 +1,6 @@
 #include <config/WukConfig.hh>
 
+#ifdef WUK_PLATFORM_WINOS
 #if WUK_SUPPORT
 #ifndef WUK_CPP_WINAPI
 #define WUK_CPP_WINAPI
@@ -7,21 +8,6 @@
 #include <WukMemory.hh>
 
 #include <Windows.h>
-
-// namespace wuk {
-//     namespace winapi {
-//         struct widthHeight {
-//             wU32 width;
-//             wU32 height;
-//         };
-//         struct widthHeight get_screen_resolution();
-//         struct widthHeight get_cursor_pos();
-//         std::string get_username(char format = 'A');
-//         void set_cursor_pos(wU32 x, wU32 y);
-//         void set_desktop_wallpaper(std::wstring &path);
-//         void opacity_startmenu(BYTE alpha);
-//     };
-// }
 
 namespace wuk {
     class WinApi {
@@ -45,8 +31,12 @@ namespace wuk {
 
         template <typename T>
         void set_wallpaper(T path) const noexcept;
+
+        template <typename T>
+        void set_window_opacity(T class_name, T window_name, BYTE bAlpha);
     };
 }
 
+#endif
 #endif
 #endif

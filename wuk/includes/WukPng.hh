@@ -8,13 +8,13 @@
 #include <WukBuffer.hh>
 
 namespace wuk {
-    namespace png {
-        class LIBWUK_API ihdr {
-        public:
-            w_u32 width;
-            w_u32 height;
-        };
-    }
+    class LIBWUK_API Png {
+    public:
+        typedef struct {
+            wU32 width;
+            wU32 height;
+        } png_ihdr;
+    };
 }
 
 #endif

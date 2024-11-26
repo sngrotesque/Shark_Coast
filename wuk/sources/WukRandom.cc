@@ -71,7 +71,7 @@ void wuk::Random::urandom(wByte *buf, wSize size)
     }
 #   elif defined(WUK_PLATFORM_LINUX)
     if(getrandom(buf, size, GRND_RANDOM) == EOF) {
-        throw wuk::Exception(errno, "wuk::Random::urandom",
+        throw wuk::Exception(static_cast<wuk::Error>(errno), "wuk::Random::urandom",
             "getrandom function returned an error code when called.");
     }
 #   endif
@@ -83,16 +83,16 @@ std::string wuk::Random::urandom(wU32 size)
         return std::string();
     }
 
-    wByte *buf = static_cast<wByte *>(malloc(size));
-    if(!buf) {
+    wByte *buffer = wuk::m_alloc<wByte *>(size);
+    if(!buffer) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Random::urandom",
-            "Failed to allocate memory for buf.");
+            "Failed to allocate memory for buffer.");
     }
 
-    this->urandom(buf, size);
+    this->urandom(buffer, size);
 
-    std::string result(reinterpret_cast<char *>(buf), size);
-    free(buf);
+    std::string result(reinterpret_cast<char *>(buffer), size);
+    wuk::m_free(buffer);
 
     return result;
 }

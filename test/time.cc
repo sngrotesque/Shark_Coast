@@ -1,11 +1,13 @@
 #include <config/WukConfig.hh>
-#include <windows.h>
 
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 
 using namespace std;
+
+#ifdef WUK_PLATFORM_WINOS
+#include <windows.h>
 
 void SetFileTimes(const char* filePath, SYSTEMTIME creationTime, SYSTEMTIME lastAccessTime, SYSTEMTIME lastWriteTime) {
     FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
@@ -31,7 +33,8 @@ void SetFileTimes(const char* filePath, SYSTEMTIME creationTime, SYSTEMTIME last
     CloseHandle(hFile);
 }
 
-int main() {
+void test()
+{
     const char* filePath = "C:/Users/sn/Desktop/PNG_TEST/122436328_p0_unpack.png.bin";
 
     SYSTEMTIME basicTime = {
@@ -52,5 +55,9 @@ int main() {
     SetFileTimes(filePath, creationTime, lastAccessTime, lastWriteTime);
 
     printf("The file timestamp has been updated: %s\n", filePath);
+}
+#endif
+
+int main() {
     return 0;
 }

@@ -7,7 +7,7 @@ std::string wuk::Time::get_now_time(std::string timeFormat)
 
     ::time(&tm_val);
 #   if defined(WUK_PLATFORM_WINOS) && defined(_MSC_VER)
-    struct tm *tm_p = static_cast<struct tm *>(malloc(sizeof(struct tm)));
+    struct tm *tm_p = wuk::m_alloc<struct tm *>(sizeof(struct tm));
     localtime_s(tm_p, &tm_val);
 #   else
     struct tm *tm_p = localtime(&tm_val);

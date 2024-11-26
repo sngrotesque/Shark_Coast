@@ -12,7 +12,7 @@ void wuk::Buffer::expand_memory(wSize length)
 {
     if (!this->data) {
         // 如果指针还未使用
-        this->data = static_cast<wByte *>(malloc(length));
+        this->data = wuk::m_alloc<wByte *>(length);
         if (!this->data) {
             throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::expand_memory",
                 "Failed to allocate memory for this->data.");
@@ -21,7 +21,7 @@ void wuk::Buffer::expand_memory(wSize length)
     } else {
         // 如果指针已使用
         wSize offset_value = this->data_offset - this->data;
-        wByte *tmp_ptr = static_cast<wByte *>(realloc(this->data, this->data_size + length));
+        wByte *tmp_ptr = wuk::m_realloc<wByte *>(this->data, this->data_size + length);
         if (!tmp_ptr) {
             throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::expand_memory",
                 "Expanding memory size failed.");
@@ -42,7 +42,21 @@ void wuk::Buffer::expand_memory(wSize length)
  */
 void wuk::Buffer::shrink_memory(wSize length)
 {
-    
+    if (!this->data) {
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Buffer::shrink_memory",
+            "Attempt to shrink the memory space of an nullptr.");
+    }
+
+    wSize offset_val = this->data_offset - this->data;
+    wByte *tmp_ptr = wuk::m_realloc<wByte *>(this->data, this->data_size - length);
+    if (!tmp_ptr) {
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::shrink_memory",
+            "shrink memory size failed.");
+    }
+    this->data = tmp_ptr;
+    this->data_offset = this->data + offset_val;
+
+    this->data_size -= length;
 }
 
 /**
@@ -69,7 +83,7 @@ wuk::Buffer::Buffer(const wuk::Buffer &other)
 {
     wSize offset_val = other.data_offset - other.data;
 
-    this->data = static_cast<wByte *>(malloc(this->data_size));
+    this->data = wuk::m_alloc<wByte *>(this->data_size);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
@@ -94,11 +108,11 @@ wuk::Buffer &wuk::Buffer::operator=(const wuk::Buffer &other)
     if(this == &other) {
         return *this;
     }
-    free(this->data);
+    wuk::m_free(this->data);
     this->data_len = other.data_len;
     this->data_size = other.data_size;
 
-    this->data = static_cast<wByte *>(malloc(this->data_size));
+    this->data = wuk::m_alloc<wByte *>(this->data_size);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");
@@ -114,7 +128,7 @@ wuk::Buffer &wuk::Buffer::operator=(wuk::Buffer &&other) noexcept
     if (this == &other) {
         return *this;
     }
-    free(this->data);
+    wuk::m_free(this->data);
     this->data = other.data;
     this->data_offset = other.data_offset;
     this->data_len = other.data_len;
@@ -136,12 +150,12 @@ wuk::Buffer::Buffer(const std::string &content)
 
 wuk::Buffer &wuk::Buffer::operator=(const std::string &other_string)
 {
-    free(this->data);
+    wuk::m_free(this->data);
 
     this->data_len = other_string.length();
     this->data_size = other_string.size();
 
-    this->data = static_cast<wByte *>(malloc(this->data_size));
+    this->data = wuk::m_alloc<wByte *>(this->data_size);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");
@@ -154,12 +168,12 @@ wuk::Buffer &wuk::Buffer::operator=(const std::string &other_string)
 
 wuk::Buffer &wuk::Buffer::operator=(std::string &&other_string)
 {
-    free(this->data);
+    wuk::m_free(this->data);
 
     this->data_len = other_string.length();
     this->data_size = other_string.size();
 
-    this->data = static_cast<wByte *>(malloc(this->data_size));
+    this->data = wuk::m_alloc<wByte *>(this->data_size);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::operator=",
             "Failed to allocate memory for this->data.");
@@ -173,7 +187,7 @@ wuk::Buffer &wuk::Buffer::operator=(std::string &&other_string)
 wuk::Buffer::Buffer(const wByte *content, wSize length)
 : data(nullptr), data_offset(nullptr), data_len(length), data_size(length)
 {
-    this->data = static_cast<wByte *>(malloc(this->data_len));
+    this->data = wuk::m_alloc<wByte *>(this->data_len);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
@@ -186,7 +200,7 @@ wuk::Buffer::Buffer(const wByte *content, wSize length)
 wuk::Buffer::Buffer(wSize memory_size)
 : data(nullptr), data_offset(nullptr), data_len(), data_size(memory_size)
 {
-    this->data = static_cast<wByte *>(malloc(this->data_size));
+    this->data = wuk::m_alloc<wByte *>(this->data_size);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
             "Failed to allocate memory for this->data.");
@@ -199,7 +213,7 @@ wuk::Buffer::Buffer(wSize memory_size)
 
 wuk::Buffer::~Buffer()
 {
-    free(this->data);
+    wuk::m_free(this->data);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -253,7 +267,10 @@ void wuk::Buffer::append(const std::string content)
 
 void wuk::Buffer::shrink_to_fit()
 {
-    
+    if (this->data_len == this->data_size) {
+        return;
+    }
+    this->shrink_memory(this->data_size - this->data_len);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -38,3 +38,11 @@ wuk::crypto::Counter::Counter(std::string nonce, wSize begin)
 {
 
 }
+
+wByte *wuk::crypto::Counter::get() noexcept
+{
+    return this->counter;
+}
+
+
+

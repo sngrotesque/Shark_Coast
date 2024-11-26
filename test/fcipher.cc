@@ -20,9 +20,12 @@ public:
     {
         wByte KeyWithIV[48]{};
         wByte salt[16]{};
-        wuk::crypto::Counter counter;
+        wByte _ctr[12]{};
+
         rnd.urandom(salt, sizeof(salt));
-        rnd.urandom(counter.counter, 12);
+        rnd.urandom(_ctr, 12);
+
+        wuk::crypto::Counter counter{_ctr, sizeof(_ctr), 7};
 
         PKCS5_PBKDF2_HMAC(password, strlen(password), salt, sizeof(salt),
             11246, EVP_sha256(), sizeof(KeyWithIV), KeyWithIV);
@@ -37,7 +40,7 @@ public:
         wSize file_length{};
 
         if (!f_i.is_open() || !f_o.is_open()) {
-            throw wuk::Exception(wuk::error::ERR, "FCipher::encrypt",
+            throw wuk::Exception(wuk::Error::ERR, "FCipher::encrypt",
                 "failed to file open.");
         }
 
@@ -45,7 +48,7 @@ public:
         if (!file_length) {
             f_i.close();
             f_o.close();
-            throw wuk::Exception(wuk::error::ERR, "FCipher::encrypt",
+            throw wuk::Exception(wuk::Error::ERR, "FCipher::encrypt",
                 "file content is null.");
         }
 
@@ -53,7 +56,7 @@ public:
 
         wByte *buffer = (wByte *)malloc(file_length);
         if (!buffer) {
-            throw wuk::Exception(wuk::error::MEMORY, "FCipher::encrypt",
+            throw wuk::Exception(wuk::Error::MEMORY, "FCipher::encrypt",
                 "");
         }
 

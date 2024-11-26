@@ -4,6 +4,7 @@
 #ifndef WUK_CPP_PAD
 #define WUK_CPP_PAD
 #include <config/WukException.hh>
+#include <WukMemory.hh>
 #include <WukRandom.hh>
 
 namespace wuk {

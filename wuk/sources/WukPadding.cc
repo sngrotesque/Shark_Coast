@@ -49,7 +49,7 @@ wByte *wuk::pkcs7_pad(const wByte *src, wSize &size, wU32 blockSize)
     padLen = blockSize - size % blockSize;
     totalLen = size + padLen;
 
-    wByte *padded = static_cast<wByte *>(malloc(totalLen));
+    wByte *padded = wuk::m_alloc<wByte *>(totalLen);
     memcpy(padded, src, size);
     memset(padded + size, padLen, padLen);
 
@@ -66,7 +66,7 @@ wByte *wuk::pkcs7_unpad(const wByte *src, wSize &size)
     wU32 padLen = src[size - 1];
     wSize unpaddedLen = size - padLen;
 
-    wByte *unpadded = static_cast<wByte *>(malloc(unpaddedLen));
+    wByte *unpadded = wuk::m_alloc<wByte *>(unpaddedLen);
     memcpy(unpadded, src, unpaddedLen);
 
     size = unpaddedLen;

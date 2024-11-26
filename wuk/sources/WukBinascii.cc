@@ -35,7 +35,7 @@ char *wuk::Binascii::b2a_hex(const wByte *buffer, wSize &length)
             "buffer is NULL.");
     }
 
-    char *result = static_cast<char *>(malloc((length << 1) + 1));
+    char *result = wuk::m_alloc<char *>((length << 1) + 1);
     if(!result) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Binascii::b2a_hex",
             "Failed to allocate memory for result.");
@@ -61,7 +61,8 @@ wByte *wuk::Binascii::a2b_hex(const char *buffer, wSize &length)
         throw wuk::Exception(wuk::Error::ERR, "wuk::Binascii::a2b_hex",
             "Odd length is not allowed.");
     }
-    wByte *result = static_cast<wByte *>(malloc((length >> 1) + 1));
+
+    wByte *result = wuk::m_alloc<wByte *>((length >> 1) + 1);
     if(!result) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Binascii::a2b_hex",
             "Failed to allocate memory for result.");
@@ -75,7 +76,7 @@ wByte *wuk::Binascii::a2b_hex(const char *buffer, wSize &length)
         top = hexTable[*(buffer_p + bi)];
         bot = hexTable[*(buffer_p + (bi + 1))];
         if((top == 31) || (bot == 31)) {
-            free(result);
+            wuk::m_free(result);
             throw wuk::Exception(wuk::Error::ERR, "wuk::Binascii::a2b_hex",
                 "characters must be from 0 to f.");
         }
@@ -93,12 +94,10 @@ std::string wuk::Binascii::b2a_hex(std::string _buffer)
     }
     wByte *buffer = reinterpret_cast<wByte *>(const_cast<char *>(_buffer.data()));
     wSize length = _buffer.size();
-    char *result = nullptr;
-
-    result = this->b2a_hex(buffer, length);
+    char *result = this->b2a_hex(buffer, length);
 
     std::string result_string{result, length};
-    free(result);
+    wuk::m_free(result);
 
     return result_string;
 }
@@ -110,12 +109,10 @@ std::string wuk::Binascii::a2b_hex(std::string _buffer)
     }
     char *buffer = const_cast<char *>(_buffer.data());
     wSize length = _buffer.size();
-    wByte *result = nullptr;
-
-    result = this->a2b_hex(buffer, length);
+    wByte *result = this->a2b_hex(buffer, length);
 
     std::string result_string{reinterpret_cast<char *>(result), length};
-    free(result);
+    wuk::m_free(result);
 
     return result_string;
 }

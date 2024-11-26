@@ -87,10 +87,7 @@ def main():
         '-I wuk/includes',
         '-I wuk/sources',
 
-        # 必要包含的源代码文件
-        'wuk/sources/config/WukException.cc',
-        'wuk/sources/WukMemory.cc',
-
+        # 编译选项
         '-O3',                # 优化级别：3（最高级别）
         '-Wsuggest-override', # 建议使用override关键词来确保派生类中的虚函数覆盖基类的虚函数。
         # '-Wnon-virtual-dtor', # 警告在有多态基类的情况下，如果析构函数不是虚函数。
@@ -106,6 +103,10 @@ def main():
         '-Wextra',            # 用于-Wall未显示的额外的警告，帮助发现代码中可能存在的问题。
         '-Werror',            # 将所有警告视为错误，这样可以确保你的代码在没有警告的情况下编译。
         '-Wall',              # 显示绝大多数错误和警告。
+        
+        # 暂时性编译选项
+        '-Wno-unused-variable',  # 忽略未使用错误
+        '-Wno-unused-parameter', # 忽略未使用参数
     )
 
     for param in compile_params:

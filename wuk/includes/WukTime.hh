@@ -4,6 +4,7 @@
 #ifndef WUK_CPP_TIME
 #define WUK_CPP_TIME
 #include <config/WukException.hh>
+#include <WukMemory.hh>
 #include <sys/timeb.h>
 #include <time.h>
 

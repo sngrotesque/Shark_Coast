@@ -4,6 +4,7 @@
 #ifndef WUK_CPP_BINASCII
 #define WUK_CPP_BINASCII
 #include <config/WukException.hh>
+#include <WukMemory.hh>
 
 namespace wuk {
     class LIBWUK_API Binascii {

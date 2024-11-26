@@ -23,7 +23,7 @@ void wuk::crypto::FEA::ctr_xcrypt(wByte *d, wSize n)
     // memcpy(counter, this->counter.counter, sizeof(this->counter.counter));
 
     // 使用这种方法的话，没法在加密后立即使用相同的FEA上下文进行解密
-    wByte *counter = this->counter.counter;
+    wByte *counter = this->counter.get();
 
     for(i = 0, ks_i = WUK_FEA_BL; i < n; ++i, ++ks_i) {
         if(ks_i == WUK_FEA_BL) {

@@ -4,6 +4,7 @@
 #ifndef WUK_CPP_RANDOM
 #define WUK_CPP_RANDOM
 #include <config/WukException.hh>
+#include <WukMemory.hh>
 #include <WukTime.hh>
 
 #if defined(WUK_PLATFORM_LINUX)
