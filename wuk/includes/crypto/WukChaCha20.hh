@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_CHACHA20
-#define WUK_CPP_CHACHA20
 #include <assert.h>
 
 namespace wuk {
@@ -23,5 +22,4 @@ namespace wuk {
     }
 }
 
-#endif
 #endif

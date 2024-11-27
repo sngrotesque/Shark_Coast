@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_NET
-#define WUK_CPP_NET
 #include <network/WukException.hh>
 #include <cmath>
 
@@ -116,5 +115,4 @@ namespace wuk {
     }
 }
 
-#endif /* WUK_CPP_NET */
 #endif /* WUK_SUPPORT */

@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_NET_EXCEPTION
-#define WUK_NET_EXCEPTION
 #include <config/WukException.hh>
 
 #if defined(WUK_PLATFORM_LINUX)
@@ -263,5 +262,4 @@ namespace wuk {
     }
 }
 
-#endif
 #endif

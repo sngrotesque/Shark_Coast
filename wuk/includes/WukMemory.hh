@@ -1,9 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_MEMORY
-#define WUK_CPP_MEMORY
-
 #ifdef WUK_PLATFORM_WINOS
 #   include <Windows.h>
 #endif
@@ -47,5 +45,4 @@ namespace wuk {
     }
 }
 
-#endif /* WUK_CPP_MEMORY */
 #endif /* WUK_SUPPORT */

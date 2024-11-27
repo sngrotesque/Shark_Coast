@@ -1,9 +1,8 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #ifdef WUK_PLATFORM_WINOS
 #if WUK_SUPPORT
-#ifndef WUK_CPP_WINAPI
-#define WUK_CPP_WINAPI
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 
@@ -37,6 +36,5 @@ namespace wuk {
     };
 }
 
-#endif
 #endif
 #endif

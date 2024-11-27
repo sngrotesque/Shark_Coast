@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_FEA
-#define WUK_CPP_FEA
 #include <WukMemory.hh>
 #include <config/WukException.hh>
 
@@ -81,5 +80,4 @@ namespace wuk {
     }
 }
 
-#endif
 #endif

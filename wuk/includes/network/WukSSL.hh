@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_SSL
-#define WUK_CPP_SSL
 #include <network/WukSocket.hh>
 
 #include <openssl/bio.h>
@@ -47,5 +46,4 @@ namespace wuk {
     }
 }
 
-#endif /* WUK_CPP_SSL */
 #endif /* WUK_SUPPORT */

@@ -1,9 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
-// 后续看看情况是否将这些字符串改为std::string
 #if WUK_SUPPORT
-#ifndef WUK_COLOR
-#define WUK_COLOR
 
 namespace wuk {
     namespace color {
@@ -53,6 +51,5 @@ namespace wuk {
     }
 }
 
-#endif /* WUK_COLOR */
 #endif
 

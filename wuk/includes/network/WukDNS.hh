@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_DNS
-#define WUK_CPP_DNS
 #include <network/WukSocket.hh>
 #include <vector>
 #include <sstream>
@@ -16,5 +15,4 @@ namespace wuk {
     }
 }
 
-#endif
 #endif

@@ -39,10 +39,47 @@ wuk::crypto::Counter::Counter(std::string nonce, wSize begin)
 
 }
 
+wuk::crypto::Counter::Counter(const Counter &other) noexcept
+{
+    memcpy(this->counter, other.counter, sizeof(this->counter));
+}
+
+wuk::crypto::Counter::Counter(Counter &&other)
+{
+    memcpy(this->counter, other.counter, sizeof(other.counter));
+
+    wuk::memory_zero(other.counter, sizeof(other.counter));
+}
+
+wuk::crypto::Counter &wuk::crypto::Counter::operator=(const wuk::crypto::Counter &other)
+{
+    if (this == &other) {
+        return *this;
+    }
+
+    memcpy(this->counter, other.counter, sizeof(other.counter));
+
+    return *this;
+}
+
+wuk::crypto::Counter &wuk::crypto::Counter::operator=(wuk::crypto::Counter &&other)
+{
+    if (this == &other) {
+        return *this;
+    }
+
+    memcpy(this->counter, other.counter, sizeof(other.counter));
+    wuk::memory_zero(other.counter, sizeof(other.counter));
+
+    return *this;
+}
+
 wByte *wuk::crypto::Counter::get() noexcept
 {
     return this->counter;
 }
 
-
-
+void wuk::crypto::Counter::clean() noexcept
+{
+    wuk::memory_zero(this->counter, sizeof(counter));
+}

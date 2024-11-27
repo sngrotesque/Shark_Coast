@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_RANDOM
-#define WUK_CPP_RANDOM
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 #include <WukTime.hh>
@@ -25,5 +24,4 @@ namespace wuk {
     };
 }
 
-#endif /* WUK_CPP_RANDOM */
 #endif /* WUK_SUPPORT */

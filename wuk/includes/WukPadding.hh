@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_PAD
-#define WUK_CPP_PAD
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 #include <WukRandom.hh>
@@ -52,5 +51,4 @@ namespace wuk {
     LIBWUK_API wByte *pkcs7_unpad(const wByte *src, wSize &size);
 }
 
-#endif /* WUK_CPP_PAD */
 #endif

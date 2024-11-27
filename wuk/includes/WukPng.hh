@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_PNG
-#define WUK_CPP_PNG
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 #include <WukBuffer.hh>
@@ -17,5 +16,4 @@ namespace wuk {
     };
 }
 
-#endif
 #endif

@@ -25,7 +25,7 @@ public:
         rnd.urandom(salt, sizeof(salt));
         rnd.urandom(_ctr, 12);
 
-        wuk::crypto::Counter counter{_ctr, sizeof(_ctr), 7};
+        wuk::crypto::Counter counter{rnd.urandom(12), 1};
 
         PKCS5_PBKDF2_HMAC(password, strlen(password), salt, sizeof(salt),
             11246, EVP_sha256(), sizeof(KeyWithIV), KeyWithIV);
@@ -57,7 +57,7 @@ public:
         wByte *buffer = (wByte *)malloc(file_length);
         if (!buffer) {
             throw wuk::Exception(wuk::Error::MEMORY, "FCipher::encrypt",
-                "");
+                "Failed to allocate memory for buffer.");
         }
 
         f_i.read(reinterpret_cast<char *>(buffer), file_length);

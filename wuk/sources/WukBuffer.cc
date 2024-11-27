@@ -184,13 +184,13 @@ wuk::Buffer &wuk::Buffer::operator=(std::string &&other_string)
     return *this;
 }
 
-wuk::Buffer wuk::Buffer::operator+(const wuk::Buffer &other)
-{
-    wuk::Buffer result{*this};
+// wuk::Buffer wuk::Buffer::operator+(const wuk::Buffer &other)
+// {
+//     wuk::Buffer result{*this};
 
-    
+//     // 别忘记调整data_offset指针的位置
 
-}
+// }
 
 wuk::Buffer::Buffer(const wByte *content, wSize length)
 : data(nullptr), data_offset(nullptr), data_len(length), data_size(length)

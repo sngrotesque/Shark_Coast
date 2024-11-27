@@ -4,11 +4,10 @@
  *    必须要将`data_offset`指针置于`data`之后，偏移长度为传入的数据的长度。
  * 2. 在任何时候，`data_offset`指向地址都不应该比`data`小，但是是否有必要增加一个判断，还有待商榷。
  */
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_BUFFER
-#define WUK_CPP_BUFFER
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 
@@ -78,5 +77,4 @@ namespace wuk {
     };
 }
 
-#endif
 #endif

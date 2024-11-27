@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_TIME
-#define WUK_CPP_TIME
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 #include <sys/timeb.h>
@@ -25,5 +24,4 @@ namespace wuk {
     };
 }
 
-#endif /* WUK_TIME */
 #endif /* WUK_SUPPORT */

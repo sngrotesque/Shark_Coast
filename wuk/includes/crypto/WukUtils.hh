@@ -1,9 +1,9 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_CRYPTO_UTILS
-#define WUK_CPP_CRYPTO_UTILS
 #include <config/WukException.hh>
+#include <WukMemory.hh>
 
 namespace wuk {
     namespace crypto {
@@ -13,14 +13,20 @@ namespace wuk {
 
         public:
             Counter();
-            Counter(const wByte *nonce, wU32 size, wSize begin);
-            Counter(const char *nonce, wU32 size, wSize begin);
-            Counter(std::string nonce, wSize begin);
+            Counter(const wByte *nonce, wU32 size, wSize begin = 1);
+            Counter(const char *nonce, wU32 size, wSize begin = 1);
+            Counter(std::string nonce, wSize begin = 1);
+
+            Counter(const Counter &other) noexcept;
+            Counter(Counter &&other) noexcept;
+
+            Counter &operator=(const Counter &other);
+            Counter &operator=(Counter &&other);
 
             wByte *get() noexcept;
+            void clean() noexcept;
         };
     }
 }
 
-#endif
 #endif

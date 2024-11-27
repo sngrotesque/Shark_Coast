@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_EXCEPTION
-#define WUK_CPP_EXCEPTION
 #include <stdexcept>
 #include <cerrno>
 
@@ -57,5 +56,4 @@ namespace wuk {
     };
 }
 
-#endif /* WUK_CPP_EXCEPTION */
 #endif /* WUK_SUPPORT */

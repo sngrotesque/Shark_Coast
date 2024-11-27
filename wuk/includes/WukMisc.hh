@@ -1,8 +1,7 @@
+#pragma once
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#ifndef WUK_CPP_MISC
-#define WUK_CPP_MISC
 #include <config/WukColor.hh>
 
 namespace wuk {
@@ -15,5 +14,4 @@ namespace wuk {
     }
 }
 
-#endif /* WUK_CPP_MISC */
 #endif /* WUK_SUPPORT */
