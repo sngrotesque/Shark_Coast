@@ -44,6 +44,9 @@ namespace wuk {
         wuk::Buffer &operator=(const std::string &other_string);
         wuk::Buffer &operator=(std::string &&other_string);
 
+        Buffer operator+(const Buffer &other);
+        Buffer &operator+=(const Buffer other);
+
         // 给予数据的构造函数
         Buffer(const wByte *content, wSize length);
         // 申请指定大小内存空间备用的构造函数

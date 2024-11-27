@@ -7,10 +7,10 @@
 #include <iostream>
 using namespace std;
 
-int main()
+void method_1()
 {
-    // wuk::Buffer buffer{32};
-    wuk::Buffer buffer = string{"this is buffer test for std::string1.\n"};
+    wuk::Buffer buffer{312};
+    // wuk::Buffer buffer = string{"this is buffer test for std::string1.\n"};
     wuk::Buffer text{"this is first.\n"};
 
     buffer = text;
@@ -26,6 +26,21 @@ int main()
 
     printf("length: %zd\n", buffer.get_length());
     printf("sizeof: %zd\n", buffer.get_size());
+}
+
+void method_2()
+{
+    wuk::Buffer buffer{16};
+    buffer.append("abcdef0123456789.");
+    buffer.shrink_to_fit();
+
+    printf("length: %zd\n", buffer.get_length());
+    printf("sizeof: %zd\n", buffer.get_size());
+}
+
+int main()
+{
+    method_2();
 
     return 0;
 }
