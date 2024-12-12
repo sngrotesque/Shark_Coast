@@ -14,8 +14,8 @@ void close_fd(wSocket fd)
 }
 
 void PrintLastError()
-#ifdef WUK_PLATFORM_WINOS
 {
+#   ifdef WUK_PLATFORM_WINOS
     DWORD error_code = WSAGetLastError();
     char* error_msg = nullptr;
 
@@ -32,13 +32,11 @@ void PrintLastError()
     std::cerr << "Error code: " << error_code << " - " << error_msg << std::endl;
 
     LocalFree(error_msg);
-}
-#else
-void PrintLastError() {
+#   else
     int error_code = errno;
     std::cerr << "Error code: " << error_code << " - " << strerror(error_code) << std::endl;
+#   endif
 }
-#endif
 
 int main() {
     wSocket sock = socket(99991, SOCK_STREAM, IPPROTO_TCP);
