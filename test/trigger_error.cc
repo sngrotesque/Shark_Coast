@@ -40,7 +40,7 @@ void PrintLastError()
 
 int main() {
     wSocket sock = socket(99991, SOCK_STREAM, IPPROTO_TCP);
-    if (sock == INVALID_SOCKET) {
+    if (sock == EOF) {
         PrintLastError();
     }
 
