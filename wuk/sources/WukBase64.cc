@@ -30,6 +30,19 @@ wSize wuk::Base64::get_encode_length(wSize length)
     return (length % 3) ? (length / 3 + 1) * 4 : (length / 3 * 4);
 }
 
+// Decoding, definition
+wSize wuk::Base64::get_decode_length(wSize length)
+{
+    // 此处+3的目的是为了不让缓冲区过小
+    return (length + 3) / 4 * 3;
+}
+
+wuk::Base64::Base64(bool strict_mode)
+: strict_mode(strict_mode)
+{
+
+}
+
 char *wuk::Base64::encode(const wByte *buffer, wSize &length)
 {
     if(!buffer || !length) {
@@ -65,29 +78,6 @@ char *wuk::Base64::encode(const wByte *buffer, wSize &length)
     length = result_length;
 
     return result;
-}
-
-std::string wuk::Base64::encode(std::string _buffer)
-{
-    if(_buffer.empty()) {
-        return std::string();
-    }
-
-    wByte *buffer = reinterpret_cast<wByte *>(const_cast<char *>(_buffer.data()));
-    wSize length = _buffer.size();
-    char *result = this->encode(buffer, length);
-
-    std::string _result{result, length};
-    wuk::m_free(result);
-
-    return _result;
-}
-
-// Decoding, definition
-wSize wuk::Base64::get_decode_length(wSize length)
-{
-    // 此处+3的目的是为了不让缓冲区过小
-    return (length + 3) / 4 * 3;
 }
 
 /*
@@ -217,6 +207,22 @@ done:
     length = bin_data - bin_data_start;
     bin_data_start[length] = 0x0;
     return bin_data_start;
+}
+
+std::string wuk::Base64::encode(std::string _buffer)
+{
+    if(_buffer.empty()) {
+        return std::string();
+    }
+
+    wByte *buffer = reinterpret_cast<wByte *>(const_cast<char *>(_buffer.data()));
+    wSize length = _buffer.size();
+    char *result = this->encode(buffer, length);
+
+    std::string _result{result, length};
+    wuk::m_free(result);
+
+    return _result;
 }
 
 std::string wuk::Base64::decode(std::string _buffer)

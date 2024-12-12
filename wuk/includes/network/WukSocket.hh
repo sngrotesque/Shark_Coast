@@ -73,6 +73,7 @@ namespace wuk {
         private:
             ADDRINFO    *get_addr_info(wS32 family, wS32 type, wS32 proto, std::string addr,
                                     std::string serviceName);
+            ADDRINFO    _get_network_info(SOCKADDR *addr);
             IPEndPoint  get_network_info(wSocket sockfd, wS32 family);
             IPEndPoint  get_network_info(wS32 family, SOCKADDR *pAddr);
             std::string network_addr_to_string_addr(wS32 family, const void *pAddr);

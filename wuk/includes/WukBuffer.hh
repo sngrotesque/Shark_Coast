@@ -15,15 +15,19 @@ namespace wuk {
     class LIBWUK_API Buffer {
     private:
         wByte *data;
-        wByte *data_offset; // 在当前已申请空间的情况下写入数据时使用（指向数据末端用于追加写入）
+
+        // 在当前已申请空间的情况下写入数据时使用（指向数据末端用于追加写入）
+        // 可以简单理解为这个指针指向的位置永远必须是`data + data_len`。
+        wByte *data_offset;
 
         wSize data_len;     // 代表实际长度
         wSize data_size;    // 代表已申请的内存空间长度
 
+    // public:
         // 用于增加可用内存大小
         void expand_memory(wSize length);
         // 用于减少可用内存大小
-        void shrink_memory(wSize length); // 未实现
+        void shrink_memory(wSize length);
         // 检查当前已申请的内存空间是否足够
         bool is_memory_sufficient(wSize length);
 
@@ -32,6 +36,14 @@ namespace wuk {
         Buffer();
         Buffer(const wuk::Buffer &other);
         Buffer(wuk::Buffer &&other);
+
+        // 给予数据的构造函数
+        Buffer(const wByte *content, wSize length);
+        // 申请指定大小内存空间备用的构造函数
+        Buffer(wSize memory_size);
+
+        // 析构函数
+        ~Buffer();
 
         // 拷贝赋值运算符
         wuk::Buffer &operator=(const wuk::Buffer &other);
@@ -46,13 +58,8 @@ namespace wuk {
         Buffer operator+(const Buffer &other);
         Buffer &operator+=(const Buffer other);
 
-        // 给予数据的构造函数
-        Buffer(const wByte *content, wSize length);
-        // 申请指定大小内存空间备用的构造函数
-        Buffer(wSize memory_size);
-
-        // 析构函数
-        ~Buffer();
+        bool operator==(const Buffer &other);
+        bool operator!=(const Buffer &other);
 
         // 判断是否为空
         bool is_empty();
@@ -62,18 +69,14 @@ namespace wuk {
         void append(const wByte *content, wSize length);
         void append(const std::string content);
 
-        // 这个方法不应该被实现，留在这是为了提醒以后使用运算符重载将其实现
-        // void append(const wuk::Buffer buffer);
-        // 尝试性实现了+和+=，出现了一个奇怪的BUG，打算后续重新实现了
-
         // 将占用的内存空间与实际使用的内存空间保持同步（防止无意义的内存占用）
-        void shrink_to_fit(); // 未实现
+        void shrink_to_fit();
 
         // 属性
-        const wByte *get_data() const;
-        const char *get_cStr();
-        wSize get_length();
-        wSize get_size();
+        const wByte *get_data() const noexcept;
+        const char *get_cStr() const noexcept;
+        wSize get_length() const noexcept;
+        wSize get_size() const noexcept;
     };
 }
 

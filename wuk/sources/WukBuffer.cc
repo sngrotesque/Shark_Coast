@@ -1,4 +1,5 @@
 #include <WukBuffer.hh>
+#include <config/WukColor.hh>
 
 //////////////////////////////////////////////////////////////////////
 /**
@@ -8,6 +9,14 @@
  * @param length 需要增加的长度（非总长度），比如要加16字节，就传入16。
  * @return 无
  */
+
+/*
+* 此方法应该优化一下
+* data_size长度在需要扩展的情况下应该始终与最终的data_len长度同齐；
+* （指调用后，但不要在内部使用shrink_to_fit方法）
+*
+* 在实现了append方法可用情况之后记得测试一下operator+方法。
+*/
 void wuk::Buffer::expand_memory(wSize length)
 {
     if (!this->data) {
@@ -68,7 +77,7 @@ void wuk::Buffer::shrink_memory(wSize length)
  */
 bool wuk::Buffer::is_memory_sufficient(wSize length)
 {
-    return (this->data_len + length) > this->data_size;
+    return (this->data_len + length) < this->data_size;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -101,6 +110,38 @@ wuk::Buffer::Buffer(wuk::Buffer &&other)
 
     other.data = nullptr;
     other.data_offset = nullptr;
+}
+
+wuk::Buffer::Buffer(const wByte *content, wSize length)
+: data(nullptr), data_offset(nullptr), data_len(length), data_size(length)
+{
+    this->data = wuk::m_alloc<wByte *>(this->data_len);
+    if (!this->data) {
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
+            "Failed to allocate memory for this->data.");
+    }
+    memcpy(this->data, content, length);
+
+    this->data_offset = this->data + length;
+}
+
+wuk::Buffer::Buffer(wSize memory_size)
+: data(nullptr), data_offset(nullptr), data_len(), data_size(memory_size)
+{
+    this->data = wuk::m_alloc<wByte *>(this->data_size);
+    if (!this->data) {
+        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
+            "Failed to allocate memory for this->data.");
+    }
+
+    wuk::memory_zero(this->data, this->data_size);
+
+    this->data_offset = this->data;
+}
+
+wuk::Buffer::~Buffer()
+{
+    wuk::m_free(this->data);
 }
 
 wuk::Buffer &wuk::Buffer::operator=(const wuk::Buffer &other)
@@ -184,44 +225,48 @@ wuk::Buffer &wuk::Buffer::operator=(std::string &&other_string)
     return *this;
 }
 
-// wuk::Buffer wuk::Buffer::operator+(const wuk::Buffer &other)
-// {
-//     wuk::Buffer result{*this};
-
-//     // 别忘记调整data_offset指针的位置
-
-// }
-
-wuk::Buffer::Buffer(const wByte *content, wSize length)
-: data(nullptr), data_offset(nullptr), data_len(length), data_size(length)
+wuk::Buffer wuk::Buffer::operator+(const wuk::Buffer &other)
 {
-    this->data = wuk::m_alloc<wByte *>(this->data_len);
-    if (!this->data) {
-        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
-            "Failed to allocate memory for this->data.");
-    }
-    memcpy(this->data, content, length);
+    wuk::Buffer result{*this};
 
-    this->data_offset = this->data + length;
+    result.expand_memory(other.data_len);
+
+    memcpy(result.data + result.data_len, other.data, other.data_len);
+
+    result.data_offset = result.data + result.data_len + other.data_len;
+    result.data_len += other.data_len;
+
+    return result;
 }
 
-wuk::Buffer::Buffer(wSize memory_size)
-: data(nullptr), data_offset(nullptr), data_len(), data_size(memory_size)
+wuk::Buffer &wuk::Buffer::operator+=(const wuk::Buffer other)
 {
-    this->data = wuk::m_alloc<wByte *>(this->data_size);
-    if (!this->data) {
-        throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
-            "Failed to allocate memory for this->data.");
-    }
+    this->expand_memory(other.data_len);
 
-    wuk::memory_zero(this->data, this->data_size);
+    memcpy(this->data + this->data_len, other.data, other.data_len);
 
-    this->data_offset = this->data;
+    this->data_offset = this->data + this->data_len + other.data_len;
+    this->data_len += other.data_len;
+
+    return *this;
 }
 
-wuk::Buffer::~Buffer()
+bool wuk::Buffer::operator==(const wuk::Buffer &other)
 {
-    wuk::m_free(this->data);
+    if (this == &other) {
+        return true;
+    }
+
+    if (this->data_len != other.data_len) {
+        return false;
+    }
+
+    
+}
+
+bool wuk::Buffer::operator!=(const wuk::Buffer &other)
+{
+    
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -240,7 +285,7 @@ bool wuk::Buffer::is_empty()
  */
 wByte *wuk::Buffer::append_write(wSize length)
 {
-    if(this->is_memory_sufficient(length)) {
+    if(!this->is_memory_sufficient(length)) {
         this->expand_memory(length);
     }
 
@@ -257,7 +302,7 @@ void wuk::Buffer::append(const wByte *content, wSize length)
             "content in nullptr.");
     }
 
-    if(this->is_memory_sufficient(length)) {
+    if(!this->is_memory_sufficient(length)) {
         this->expand_memory(length);
     }
 
@@ -282,22 +327,22 @@ void wuk::Buffer::shrink_to_fit()
 }
 
 //////////////////////////////////////////////////////////////////////
-const wByte *wuk::Buffer::get_data() const
+const wByte *wuk::Buffer::get_data() const noexcept
 {
     return this->data;
 }
 
-const char *wuk::Buffer::get_cStr()
+const char *wuk::Buffer::get_cStr() const noexcept
 {
     return reinterpret_cast<const char *>(this->data);
 }
 
-wSize wuk::Buffer::get_length()
+wSize wuk::Buffer::get_length() const noexcept
 {
     return this->data_len;
 }
 
-wSize wuk::Buffer::get_size()
+wSize wuk::Buffer::get_size() const noexcept
 {
     return this->data_size;
 }
