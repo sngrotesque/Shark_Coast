@@ -18,10 +18,11 @@
 #   include <netinet/ip.h>
 #   include <netinet/tcp.h>
 #   define WUK_NET_ERROR EOF              // 定义错误代码
-typedef struct sockaddr     SOCKADDR;     // 套接字地址结构
-typedef struct addrinfo     ADDRINFO;     // 域名解析结构
-typedef struct sockaddr_in  SOCKADDR_IN;  // IPv4网络结构
-typedef struct sockaddr_in6 SOCKADDR_IN6; // IPv6网络结构
+typedef struct sockaddr         SOCKADDR;
+typedef struct addrinfo         ADDRINFO;
+typedef struct sockaddr_in      SOCKADDR_IN;
+typedef struct sockaddr_in6     SOCKADDR_IN6;
+typedef struct sockaddr_storage SOCKADDR_STORAGE;
 typedef wS32   wSocket;                   // wukNet的socket类型
 #elif defined(WUK_PLATFORM_WINOS)
 #   include <WS2tcpip.h>
@@ -65,10 +66,13 @@ namespace wuk {
         private:
             SOCKADDR *ai_addr;
             socklen_t ai_addrlen;
-            std::string n_addr;
-            wU16 n_port;
 
             std::string _to_string_addr(wI32 family, const void *pAddr) const;
+
+            std::string to_string_addr(const SOCKADDR_IN *ipv4_addr) const;
+            std::string to_string_addr(const SOCKADDR_IN6 *ipv6_addr) const;
+            std::string to_string_addr(const ADDRINFO *addr) const;
+            std::string to_string_addr(const SOCKADDR *addr, wI32 family) const;
 
         public:
             IPEndPoint();
@@ -76,23 +80,10 @@ namespace wuk {
             IPEndPoint(std::string addr, wU16 port);
             ~IPEndPoint();
 
-            std::string to_string_addr(const SOCKADDR_IN *ipv4_addr) const;
-            std::string to_string_addr(const SOCKADDR_IN6 *ipv6_addr) const;
-            std::string to_string_addr(const ADDRINFO *addr) const;
-            std::string to_string_addr(const SOCKADDR *addr, wI32 family) const;
-
-            void set_sockaddr(SOCKADDR *addr, socklen_t addrlen);
-            void ser_host_port(std::string addr, wU16 port);
-            void set_host(std::string addr);
-            void set_port(wU16 port);
-
-            void get_network_info(wSocket fd, wI32 family);
-            void get_network_info(SOCKADDR *addr, wI32 family);
-
             const SOCKADDR *get_ai_addr() const;
             socklen_t get_ai_addrlen() const;
-            std::string get_n_addr() const;
-            wU16 get_n_port() const;
+            std::string get_host() const;
+            wU16 get_port() const;
         };
     }
 }
@@ -121,8 +112,9 @@ namespace wuk {
 
             void setsockopt(wI32 level, wI32 opt_name, wuk::net::SockOpt opt);
             void getsockopt(wI32 level, wI32 opt_name, wuk::net::SockOpt &opt);
-            IPEndPoint getsockname();
+
             IPEndPoint getsockname(wSocket fd);
+            IPEndPoint getsockname();
 
             void settimeout(double timeout_val);
 
@@ -131,12 +123,12 @@ namespace wuk {
             void listen(const wI32 backlog);
             wuk::net::Socket accept();
 
-            void send(const wuk::Buffer buffer, const wI32 flag);
-            void sendall(const wuk::Buffer buffer, const wI32 flag);
-            void sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag);
+            void send(const wuk::Buffer buffer, const wI32 flag = 0);
+            void sendall(const wuk::Buffer buffer, const wI32 flag = 0);
+            void sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag = 0);
 
-            wuk::Buffer recv(const wI32 length, const wI32 flag);
-            wuk::Buffer recvfrom(const wI32 length, wuk::net::IPEndPoint &from, const wI32 flag);
+            wuk::Buffer recv(const wI32 length, const wI32 flag = 0);
+            wuk::Buffer recvfrom(const wI32 length, wuk::net::IPEndPoint &from, const wI32 flag = 0);
 
             void shutdown(const wI32 how);
             void shutdown(wuk::net::SD_SW how);
@@ -144,6 +136,7 @@ namespace wuk {
 
         public:
             wSocket get_socket() const;
+            wI32 get_transmission_length() const;
         };
     }
 }

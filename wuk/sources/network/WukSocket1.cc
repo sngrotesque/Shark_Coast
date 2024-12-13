@@ -30,22 +30,45 @@ std::string wuk::net::IPEndPoint::_to_string_addr(wI32 family, const void *pAddr
 }
 
 wuk::net::IPEndPoint::IPEndPoint()
-: ai_addr(nullptr), ai_addrlen(sizeof(SOCKADDR)), n_addr(), n_port()
+: ai_addr(nullptr), ai_addrlen(sizeof(SOCKADDR))
 {
     this->ai_addr = wuk::m_alloc<SOCKADDR *>(this->ai_addrlen);
 }
 
 wuk::net::IPEndPoint::IPEndPoint(SOCKADDR *addr, socklen_t addrlen)
-: ai_addrlen(addrlen), n_addr(), n_port()
+: ai_addr(nullptr), ai_addrlen(addrlen)
 {
     this->ai_addr = wuk::m_alloc<SOCKADDR *>(addrlen);
-    memcpy(this->ai_addr, addr, addrlen);
+
+    if (addr) {
+        memcpy(this->ai_addr, addr, addrlen);
+    }
 }
 
 wuk::net::IPEndPoint::IPEndPoint(std::string addr, wU16 port)
-: ai_addr(nullptr), ai_addrlen(), n_addr(addr), n_port(port)
+: ai_addr(nullptr), ai_addrlen()
 {
-
+    if (addr.find(':') != std::string::npos) {
+        SOCKADDR_IN6 addrv6{};
+        addrv6.sin6_family = AF_INET6;
+        addrv6.sin6_port = htons(port);
+        if (inet_pton(AF_INET6, addr.c_str(), &addrv6.sin6_addr) != 1) {
+            wuk::net::exception("wuk::net::IPEndPoint::IPEndPoint");
+        }
+        this->ai_addr = wuk::m_alloc<SOCKADDR *>(sizeof(addrv6));
+        this->ai_addrlen = sizeof(addrv6);
+        memcpy(this->ai_addr, &addrv6, sizeof(addrv6));
+    } else {
+        SOCKADDR_IN addrv4{};
+        addrv4.sin_family = AF_INET;
+        addrv4.sin_port = htons(port);
+        if (inet_pton(AF_INET, addr.c_str(), &addrv4.sin_addr) != 1) {
+            wuk::net::exception("wuk::net::IPEndPoint::IPEndPoint");
+        }
+        this->ai_addr = wuk::m_alloc<SOCKADDR *>(sizeof(addrv4));
+        this->ai_addrlen = sizeof(addrv4);
+        memcpy(this->ai_addr, &addrv4, sizeof(addrv4));
+    }
 }
 
 wuk::net::IPEndPoint::~IPEndPoint()
@@ -83,50 +106,6 @@ std::string wuk::net::IPEndPoint::to_string_addr(const SOCKADDR *addr, wI32 fami
     return this->to_string_addr(ipv6_addr);
 }
 
-void wuk::net::IPEndPoint::set_sockaddr(SOCKADDR *addr, socklen_t addrlen)
-{
-    if (this->ai_addrlen != addrlen) {
-        wuk::m_free(this->ai_addr);
-        this->ai_addr = wuk::m_alloc<SOCKADDR *>(addrlen);
-        this->ai_addrlen = addrlen;
-    }
-    memcpy(this->ai_addr, addr, this->ai_addrlen);
-}
-
-void wuk::net::IPEndPoint::ser_host_port(std::string addr, wU16 port)
-{
-    this->n_addr = addr;
-    this->n_port = port;
-}
-
-void wuk::net::IPEndPoint::set_host(std::string addr)
-{
-    this->n_addr = addr;
-}
-
-void wuk::net::IPEndPoint::set_port(wU16 port)
-{
-    this->n_port = port;
-}
-
-void wuk::net::IPEndPoint::get_network_info(wSocket fd, wI32 family)
-{
-    // 后续将getsockname实现在wuk::net::Socket内部并将当前类的所有内容移植到其中。
-
-    SOCKADDR_STORAGE addr{};
-    socklen_t addrlen{};
-
-    wI32 err = getsockname(fd, reinterpret_cast<SOCKADDR *>(&addr), &addrlen);
-    if (err == WUK_NET_ERROR) {
-        wuk::net::exception("wuk::net::IPEndPoint::get_network_info");
-    }
-}
-
-void wuk::net::IPEndPoint::get_network_info(SOCKADDR *addr, wI32 family)
-{
-    
-}
-
 const SOCKADDR *wuk::net::IPEndPoint::get_ai_addr() const
 {
     return this->ai_addr;
@@ -137,14 +116,33 @@ socklen_t wuk::net::IPEndPoint::get_ai_addrlen() const
     return this->ai_addrlen;
 }
 
-std::string wuk::net::IPEndPoint::get_n_addr() const
+std::string wuk::net::IPEndPoint::get_host() const
 {
-    return this->n_addr;
+    wI32 family_val{};
+
+    if (this->ai_addrlen == sizeof(SOCKADDR_IN)) {
+        family_val = AF_INET;
+    } else if (this->ai_addrlen == sizeof(SOCKADDR_IN6)) {
+        family_val = AF_INET6;
+    } else {
+        wuk::net::exception("wuk::net::IPEndPoint::get_host unknown protocol.");
+    }
+
+    return this->to_string_addr(this->ai_addr, family_val);
 }
 
-wU16 wuk::net::IPEndPoint::get_n_port() const
+wU16 wuk::net::IPEndPoint::get_port() const
 {
-    return this->n_port;
+    if (this->ai_addrlen == sizeof(SOCKADDR_IN)) {
+        SOCKADDR_IN *ipv4 = reinterpret_cast<SOCKADDR_IN *>(this->ai_addr);
+        return ntohs(ipv4->sin_port);
+    } else if (this->ai_addrlen == sizeof(SOCKADDR_IN6)) {
+        SOCKADDR_IN6 *ipv6 = reinterpret_cast<SOCKADDR_IN6 *>(this->ai_addr);
+        return ntohs(ipv6->sin6_port);
+    } else {
+        wuk::net::exception("wuk::net::IPEndPoint::get_host unknown protocol.");
+    }
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +154,7 @@ _t_size(), laddr(), raddr()
 
 }
 
-wuk::net::Socket::Socket(wI32 family, wI32 type, wI32 proto = 0, wSocket other_fd = WUK_NET_ERROR)
+wuk::net::Socket::Socket(wI32 family, wI32 type, wI32 proto, wSocket other_fd)
 : _timeout(), _fd(), _family(family), _type(type), _proto(proto),
 _t_size(), laddr(), raddr()
 {
@@ -205,16 +203,29 @@ void wuk::net::Socket::setsockopt(wI32 level, wI32 opt_name, wuk::net::SockOpt o
 void wuk::net::Socket::getsockopt(wI32 level, wI32 opt_name, wuk::net::SockOpt &opt)
 {
     wI32 err = ::getsockopt(this->_fd, level, opt_name, opt.val, &opt.val_len);
-    if (err = WUK_NET_ERROR) {
+    if (err == WUK_NET_ERROR) {
         wuk::net::exception("wuk::net::Socket::getsockopt");
     }
 }
 
 wuk::net::IPEndPoint wuk::net::Socket::getsockname(wSocket fd)
 {
-    
+    SOCKADDR_STORAGE addr{};
+    socklen_t addrlen{};
 
-    wI32 err = ::getsockname(fd, nullptr, nullptr);
+    SOCKADDR *addr_ptr = reinterpret_cast<SOCKADDR *>(&addr);
+
+    wI32 err = ::getsockname(fd, addr_ptr, &addrlen);
+    if (err == WUK_NET_ERROR) {
+        wuk::net::exception("wuk::net::Socket::getsockname");
+    }
+
+    return wuk::net::IPEndPoint{addr_ptr, addrlen};
+}
+
+wuk::net::IPEndPoint wuk::net::Socket::getsockname()
+{
+    return this->getsockname(this->_fd);
 }
 
 void wuk::net::Socket::settimeout(double timeout_val)
@@ -275,6 +286,7 @@ void wuk::net::Socket::listen(const wI32 backlog)
 
 wuk::net::Socket wuk::net::Socket::accept()
 {
+    // 此处应使用wuk::net::IPEndPoint
     SOCKADDR addr{};
     socklen_t addrlen{};
 
@@ -322,17 +334,16 @@ void wuk::net::Socket::sendall(const wuk::Buffer buffer, const wI32 flag)
 
 void wuk::net::Socket::sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag)
 {
-    // this->_t_size = ::sendto(this->_fd, buffer.get_cStr(), buffer.get_length(), flag,
-    //                         &target.ai_addr, target.ai_addrlen);
-    
-    // if (this->_t_size == WUK_NET_ERROR) {
-    //     wuk::net::exception("wuk::net::Socket::send");
-    // }
+    this->_t_size = ::sendto(this->_fd, buffer.get_cStr(), buffer.get_length(), flag,
+                            target.get_ai_addr(), target.get_ai_addrlen());
+    if (this->_t_size == WUK_NET_ERROR) {
+        wuk::net::exception("wuk::net::Socket::sendto");
+    }
 }
 
 wuk::Buffer wuk::net::Socket::recv(const wI32 length, const wI32 flag)
 {
-    wuk::Buffer buffer{length};
+    wuk::Buffer buffer{static_cast<wSize>(length)};
 
     this->_t_size = ::recv(this->_fd,
                         reinterpret_cast<char *>(buffer.append_write(length)),
@@ -347,15 +358,24 @@ wuk::Buffer wuk::net::Socket::recv(const wI32 length, const wI32 flag)
 
 wuk::Buffer wuk::net::Socket::recvfrom(const wI32 length, wuk::net::IPEndPoint &from, const wI32 flag)
 {
-    // wuk::Buffer buffer{length};
+    // 未完成
+    wuk::Buffer buffer{static_cast<wSize>(length)};
 
-    // this->_t_size = ::recvfrom(this->_fd,
-    //                         reinterpret_cast<char *>(buffer.append_write(length)),
-    //                         length, flag, &from.ai_addr, &from.ai_addrlen);
+    SOCKADDR_STORAGE ai_addr{};
+    socklen_t ai_addrlen{sizeof(ai_addr)};
+
+    char *buffer_ptr = reinterpret_cast<char *>(buffer.append_write(length));
+    SOCKADDR *ai_addr_ptr = reinterpret_cast<SOCKADDR *>(&ai_addr);
+
+    this->_t_size = ::recvfrom(this->_fd, buffer_ptr, length, flag, ai_addr_ptr, &ai_addrlen);
     
-    // if (this->_t_size == WUK_NET_ERROR) {
-    //     wuk::net::exception("wuk::net::Socket::recvfrom");
-    // }
+    // from.set_sockaddr(ai_addr_ptr, ai_addrlen);
+
+    if (this->_t_size == WUK_NET_ERROR) {
+        wuk::net::exception("wuk::net::Socket::recvfrom");
+    }
+
+    return buffer;
 }
 
 void wuk::net::Socket::shutdown(const wI32 how)
@@ -380,4 +400,14 @@ void wuk::net::Socket::close()
     {
         wuk::net::exception("wuk::net::Socket::close");
     }
+}
+
+wSocket wuk::net::Socket::get_socket() const
+{
+    return this->_fd;
+}
+
+wI32 wuk::net::Socket::get_transmission_length() const
+{
+    return this->_t_size;
 }

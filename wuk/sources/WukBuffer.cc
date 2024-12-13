@@ -251,23 +251,23 @@ wuk::Buffer &wuk::Buffer::operator+=(const wuk::Buffer other)
     return *this;
 }
 
-bool wuk::Buffer::operator==(const wuk::Buffer &other)
-{
-    if (this == &other) {
-        return true;
-    }
+// bool wuk::Buffer::operator==(const wuk::Buffer &other)
+// {
+//     if (this == &other) {
+//         return true;
+//     }
 
-    if (this->data_len != other.data_len) {
-        return false;
-    }
+//     if (this->data_len != other.data_len) {
+//         return false;
+//     }
 
     
-}
+// }
 
-bool wuk::Buffer::operator!=(const wuk::Buffer &other)
-{
+// bool wuk::Buffer::operator!=(const wuk::Buffer &other)
+// {
     
-}
+// }
 
 //////////////////////////////////////////////////////////////////////
 bool wuk::Buffer::is_empty()

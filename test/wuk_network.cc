@@ -1,91 +1,81 @@
 #include <config/WukConfig.hh>
 #include <config/WukException.hh>
+#include <network/WukException.cc>
+#include <network/WukSocket1.cc>
+#include <WukBuffer.cc>
+
 #include <WukMemory.hh>
 
-#include <ws2tcpip.h>
 #include <iostream>
 using namespace std;
 
-#include <network/WukSocket1.cc>
-
-class Socket {
-private:
-    int s_family;
-    int s_type;
-    int s_proto;
-
-    SOCKET fd;
-
-    wuk::net::IPEndPoint local;
-    wuk::net::IPEndPoint remote;
-
-    Socket(int family, int socktype, int proto)
-    : s_family(family), s_type(socktype), s_proto(proto)
-    {
-        this->fd = socket(this->s_family, this->s_type, this->s_proto);
-        if (this->fd == SOCKET_ERROR) {
-            throw wuk::Exception(GetLastError(), "Socket::Socket", "create socket error.");
-        }
-    }
-
-    ADDRINFO *get_addrinfo(const char *server_name, const char *service_name)
-    {
-        ADDRINFO hints{}, *result{nullptr};
-
-        hints.ai_family = this->s_family;
-        hints.ai_socktype = this->s_type;
-        hints.ai_protocol = this->s_proto;
-
-        int err = getaddrinfo(server_name, service_name, &hints, &result);
-        if (err) {
-            throw wuk::Exception(err, "Socket::get_addrinfo", "getaddrinfo error.");
-        }
-
-        return result;
-    }
-
-    ADDRINFO *get_addrinfo(std::string server_host, wU16 server_port)
-    {
-        return this->get_addrinfo(server_host.c_str(), to_string(server_port).c_str());
-    }
-
-    void connect(std::string server_host, wU16 server_port)
-    {
-        ADDRINFO *address_resolution_result = this->get_addrinfo(server_host, server_port);
-
-        int err = ::connect(this->fd, address_resolution_result->ai_addr,
-                            address_resolution_result->ai_addrlen);
-        if (err == SOCKET_ERROR) {
-            throw wuk::Exception(err, "Socket::connect", "connect error.");
-        }
-
-        remote.addrinfo_set.set_sockaddr(address_resolution_result->ai_addr,
-                                        address_resolution_result->ai_addrlen);
-        // remote.addrinfo_set.ai_addr = remote.to_string_addr(address_resolution_result->ai_addr);
-
-
-        free(address_resolution_result);
-    }
-
-};
-
-
-
-
-int main()
+void wuknet_server_test()
 {
-#   ifdef WUK_PLATFORM_WINOS
-    WSADATA ws;
-    WSAStartup(MAKEWORD(2,2), &ws);
-#   endif
+    wuk::net::Socket fd{AF_INET, SOCK_DGRAM, IPPROTO_UDP};
+    wuk::net::IPEndPoint client;
 
+    wuk::Buffer recvBuffer;
+    wuk::Buffer sendBuffer{"test server message."};
 
+    fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, wuk::net::SockOpt{1});
+    fd.bind("0.0.0.0", 49881);
 
+    recvBuffer = fd.recvfrom(4096, client);
 
+    cout << recvBuffer.get_cStr() << endl;
 
+    fd.sendto(sendBuffer, client);
 
-#   ifdef WUK_PLATFORM_WINOS
-    WSACleanup();
-#   endif
+    fd.shutdown(wuk::net::SD_SW::BOTH);
+    fd.close();
+}
+
+void wuknet_client_test()
+{
+    wuk::net::Socket fd{AF_INET, SOCK_DGRAM, IPPROTO_UDP};
+    wuk::net::IPEndPoint pointer{"127.0.0.1", 49981};
+
+    wuk::Buffer recvBuffer;
+    wuk::Buffer sendBuffer{"test client message."};
+
+    fd.sendto(sendBuffer, pointer);
+}
+
+// int main()
+// {
+// #   ifdef WUK_PLATFORM_WINOS
+//     WSADATA ws;
+//     if (WSAStartup(MAKEWORD(2,2), &ws)) {
+//         throw runtime_error("WSAStartup error!" + to_string(WSAGetLastError()));
+//     }
+// #   endif
+
+//     try {
+//         wuknet_server_test();
+//     } catch (wuk::Exception &e) {
+//         cout << "Error! " << e.what() << endl;
+//     }
+
+// #   ifdef WUK_PLATFORM_WINOS
+//     WSACleanup();
+// #   endif
+//     return 0;
+// }
+
+///////////////////////////////////////////////////////////////////////////
+
+int main() {
+    const char* ip_str_v4 = "192.168.1.1";
+    const char* ip_str_v6 = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+
+    try {
+        cout << wuk::net::IPEndPoint{ip_str_v4, 0}.get_host() << endl;
+        cout << wuk::net::IPEndPoint(ip_str_v6, 0).get_host() << endl;
+    } catch (wuk::Exception &e) {
+        cout << "Error! " << e.what() << endl;
+    }
+
     return 0;
 }
+
+
