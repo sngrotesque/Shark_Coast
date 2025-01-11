@@ -6,6 +6,7 @@
 #include <network/WukIPEndPoint.hh>
 #include <network/WukSocketOptions.hh>
 #include <WukBuffer.hh>
+#include <cmath>
 
 namespace wuk {
     namespace net {
