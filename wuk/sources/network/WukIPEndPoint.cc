@@ -4,7 +4,7 @@ std::string wuk::net::IPEndPoint::_to_string_addr(wI32 family, const void *pAddr
 {
     char buffer_addr[INET6_ADDRSTRLEN]{};
 
-    if (!inet_ntop(family, pAddr, buffer_addr, ARRAYSIZE(buffer_addr))) {
+    if (!inet_ntop(family, pAddr, buffer_addr, INET6_ADDRSTRLEN)) {
         // wuk::net::exception("wuk::net::IPEndPoint::to_string_addr");
         throw wuk::net::Exception("wuk::net::IPEndPoint::_to_string_addr");
     }
