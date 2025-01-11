@@ -10,8 +10,8 @@ int main()
         wuk::net::Socket fd{AF_INET, SOCK_STREAM, IPPROTO_TCP};
         wSize bytes_sent = 0;
 
-        // fd.connect("47.243.162.23", PORT);
-        fd.connect("localhost", PORT);
+        fd.connect("47.243.162.23", PORT);
+        // fd.connect("localhost", PORT);
 
         wByte _buffer_temp[4096];
         wuk::Buffer buffer{_buffer_temp, sizeof(_buffer_temp)};

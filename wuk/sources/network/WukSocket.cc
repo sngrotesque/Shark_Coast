@@ -142,9 +142,9 @@ wuk::net::Socket wuk::net::Socket::accept()
     wSocket other_fd = ::accept(this->_fd, info.get_ai_addr_ptr(),
                                 info.get_ai_addrlen_ptr());
 
-    printf("wuk::net::Socket::accept TEST\n"
-            "host_name: %s\nhost_port: %u\n",
-            info.get_host().c_str(), info.get_port());
+    // printf("wuk::net::Socket::accept TEST\n"
+    //         "host_name: %s\nhost_port: %u\n",
+    //         info.get_host().c_str(), info.get_port());
 
     if (static_cast<wI32>(other_fd) == WUK_NET_ERROR) {
         throw wuk::net::Exception("wuk::net::Socket::accept");
