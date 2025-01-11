@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cstdlib>   // 标准库
 #include <cstdarg>   // 标准参数库
 #include <cstring>   // 标准字符串库
@@ -36,29 +35,12 @@
  * https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
  */
 
-/**
- * 对于字节序的判断，如非必要，请勿在代码中直接添加用于判断端序的代码（比如利用指针），
- * 请直接使用WUK_SUPPORT宏进行判断，如果WUK_SUPPORT宏无法用于判断，请优化此宏并且
- * 不应在代码中添加判断端序的代码。
- */
 #if defined(_WIN32) || defined(_WIN64) // Microsoft Windows
 #   define WUK_PLATFORM_WINOS
 #   define WUK_SUPPORT true
-#   define WUK_LE_ENDIAN true // 小端序，由于绝大多数（几乎所有）的Windows系统都是小端序，所以直接忽略大端序。
 #elif defined(__linux) || defined(__gnu_linux__) || defined(__linux__) // Linux
 #   define WUK_PLATFORM_LINUX
 #   define WUK_SUPPORT true
-#   if __BYTE_ORDER__
-#       if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#           define WUK_LE_ENDIAN true // 小端序
-#       elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#           define WUK_LE_ENDIAN false // 大端序
-#       else
-#           error "Endian judgment error."
-#       endif
-#   else
-#       error "Endian judgment error."
-#   endif
 #elif defined(__ANDROID__) // Android
 #   define WUK_PLATFORM_ANDROID
 #   define WUK_SUPPORT false

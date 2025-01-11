@@ -8,6 +8,7 @@
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
+#include <config/WukEndianness.hh>
 #include <config/WukException.hh>
 #include <WukMemory.hh>
 
@@ -45,6 +46,7 @@ namespace wuk {
         // 析构函数
         ~Buffer();
 
+    public:
         // 拷贝赋值运算符
         wuk::Buffer &operator=(const wuk::Buffer &other);
         // 移动赋值运算符
@@ -61,6 +63,7 @@ namespace wuk {
         bool operator==(const Buffer &other);
         bool operator!=(const Buffer &other);
 
+    public:
         // 判断是否为空
         bool is_empty();
         // 在需要写入指定长度的大小的内容且同时需要指针的情况下调用此方法
@@ -69,10 +72,15 @@ namespace wuk {
         void append(const wByte *content, wSize length);
         void append(const std::string content);
 
+        // 传入数字并序列化
+        // 比如传入2 (int)，得到 00 00 00 02 (Hex)
+        template <typename T>
+        void append_number(T val);
+
         // 将占用的内存空间与实际使用的内存空间保持同步（防止无意义的内存占用）
         void shrink_to_fit();
 
-        // 属性
+    public:
         const wByte *get_data() const noexcept;
         const char *get_cStr() const noexcept;
         wSize get_length() const noexcept;

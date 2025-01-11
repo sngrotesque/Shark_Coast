@@ -1,81 +1,116 @@
 #include <config/WukConfig.hh>
 #include <config/WukException.hh>
-#include <network/WukException.cc>
-#include <network/WukSocket1.cc>
-#include <WukBuffer.cc>
 
-#include <WukMemory.hh>
+#include <network/WukSocket.cc>
+#include <network/WukIPEndPoint.cc>
+#include <network/WukSocketOptions.cc>
+#include <WukBuffer.cc>
 
 #include <iostream>
 using namespace std;
 
-void wuknet_server_test()
+#define TEST_SERVER_HOST_V4 "0.0.0.0"
+#define TEST_CLIENT_HOST_V4 "127.0.0.1"
+
+#define TEST_SERVER_HOST_V6 "::"
+#define TEST_CLIENT_HOST_V6 "::1"
+
+#define TEST_COMM_PORT 49981
+
+namespace udp {
+    void wuknet_server_test()
+    {
+        wuk::net::Socket fd{AF_INET6, SOCK_DGRAM, IPPROTO_UDP};
+        wuk::net::IPEndPoint client;
+
+        wuk::Buffer recvBuffer;
+        wuk::Buffer sendBuffer{"test server message."};
+
+        fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, wuk::net::SockOpt{1});
+        fd.bind(TEST_SERVER_HOST_V6, TEST_COMM_PORT);
+
+        recvBuffer = fd.recvfrom(4096, client);
+
+        cout << recvBuffer.get_cStr() << endl;
+
+        fd.sendto(sendBuffer, client);
+
+        fd.shutdown(wuk::net::SD_SW::BOTH);
+        fd.close();
+    }
+
+    void wuknet_client_test()
+    {
+        wuk::net::Socket fd{AF_INET, SOCK_DGRAM, IPPROTO_UDP};
+        wuk::net::IPEndPoint pointer{TEST_CLIENT_HOST_V4, TEST_COMM_PORT};
+
+        wuk::Buffer recvBuffer;
+        wuk::Buffer sendBuffer{"test client message."};
+
+        fd.sendto(sendBuffer, pointer);
+
+        recvBuffer = fd.recvfrom(256, pointer);
+        cout << recvBuffer.get_cStr() << endl;
+
+        fd.shutdown(wuk::net::SD_SW::BOTH);
+        fd.close();
+    }
+}
+
+namespace tcp {
+    void wuknet_server_host()
+    {
+        wuk::net::Socket fd{AF_INET, SOCK_STREAM, IPPROTO_TCP};
+        
+        wuk::Buffer recvBuffer;
+        wuk::Buffer sendBuffer{"test server message."};
+
+        fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, wuk::net::SockOpt{1});
+        fd.bind(TEST_SERVER_HOST_V4, TEST_COMM_PORT);
+        fd.listen(5);
+
+        cout << "wait connected..." << endl;
+        wuk::net::Socket client_fd = fd.accept();
+
+        client_fd.shutdown(wuk::net::SD_SW::BOTH);
+
+        client_fd.close();
+        fd.close();
+    }
+}
+
+void with_python()
 {
-    wuk::net::Socket fd{AF_INET, SOCK_DGRAM, IPPROTO_UDP};
-    wuk::net::IPEndPoint client;
+    wuk::net::Socket fd(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    wuk::Buffer recvBuffer;
-    wuk::Buffer sendBuffer{"test server message."};
+    fd.connect("www.baidu.com", 80);
 
-    fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, wuk::net::SockOpt{1});
-    fd.bind("0.0.0.0", 49881);
+    cout << "socket fd: " << fd.get_fileno() << endl;
+    system("pause");
 
-    recvBuffer = fd.recvfrom(4096, client);
-
-    cout << recvBuffer.get_cStr() << endl;
-
-    fd.sendto(sendBuffer, client);
-
-    fd.shutdown(wuk::net::SD_SW::BOTH);
     fd.close();
 }
 
-void wuknet_client_test()
+int main()
 {
-    wuk::net::Socket fd{AF_INET, SOCK_DGRAM, IPPROTO_UDP};
-    wuk::net::IPEndPoint pointer{"127.0.0.1", 49981};
-
-    wuk::Buffer recvBuffer;
-    wuk::Buffer sendBuffer{"test client message."};
-
-    fd.sendto(sendBuffer, pointer);
-}
-
-// int main()
-// {
-// #   ifdef WUK_PLATFORM_WINOS
-//     WSADATA ws;
-//     if (WSAStartup(MAKEWORD(2,2), &ws)) {
-//         throw runtime_error("WSAStartup error!" + to_string(WSAGetLastError()));
-//     }
-// #   endif
-
-//     try {
-//         wuknet_server_test();
-//     } catch (wuk::Exception &e) {
-//         cout << "Error! " << e.what() << endl;
-//     }
-
-// #   ifdef WUK_PLATFORM_WINOS
-//     WSACleanup();
-// #   endif
-//     return 0;
-// }
-
-///////////////////////////////////////////////////////////////////////////
-
-int main() {
-    const char* ip_str_v4 = "192.168.1.1";
-    const char* ip_str_v6 = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+#   ifdef WUK_PLATFORM_WINOS
+    WSADATA ws;
+    if (WSAStartup(MAKEWORD(2,2), &ws)) {
+        throw runtime_error("WSAStartup error!" + to_string(WSAGetLastError()));
+    }
+#   endif
 
     try {
-        cout << wuk::net::IPEndPoint{ip_str_v4, 0}.get_host() << endl;
-        cout << wuk::net::IPEndPoint(ip_str_v6, 0).get_host() << endl;
+        // tcp::wuknet_server_host();
+        with_python();
     } catch (wuk::Exception &e) {
         cout << "Error! " << e.what() << endl;
+    } catch (wuk::net::Exception &e) {
+        cout << "Net Error! " << e.what() << endl;
     }
 
+#   ifdef WUK_PLATFORM_WINOS
+    WSACleanup();
+#   endif
     return 0;
 }
-
-

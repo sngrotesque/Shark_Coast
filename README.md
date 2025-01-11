@@ -90,6 +90,7 @@ A：因为我从未真正使用过`Mac OS`[^macos]，并且也不熟悉它的操
     对于基本类型（如`int`, `char`, `unsigled char`, `(u)int{x}_t`, `pointer （不含类类型指针）`等），应使用[WukMemory](wuk/includes/WukMemory.hh)中的`wuk::m_alloc`与`wuk::m_realloc`等处理内存空间，对于类类型，请使用C++关键字`new ([])`与`delete ([])`等处理内存空间。
 9.  使用`空格(Space)`作为缩进符！缩进单位：4个空格符。
 10. 对于类型转换[^diff_type_conversion]：对于数字类型（整数和浮点数）使用C风格转换或C++风格转换皆可，其他类型请全部使用C++风格的转换。
+11. 为了保证可读性和维护性，请在实现时按照声明顺序实现一个类类型。例如类中的方法顺序是`funcA(); funcB(); funcC();`，那么在实现文件中也必须是这个顺序，不能是比如`funcB(); funcA(); funcC();`。
 
 ### 版本更新日志（Change log）
 > 在未来实现爬虫库时要查阅的文档：

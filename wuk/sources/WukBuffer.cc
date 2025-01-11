@@ -115,6 +115,11 @@ wuk::Buffer::Buffer(wuk::Buffer &&other)
 wuk::Buffer::Buffer(const wByte *content, wSize length)
 : data(nullptr), data_offset(nullptr), data_len(length), data_size(length)
 {
+    if (!content) {
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Buffer::Buffer",
+            "content is nullptr.");
+    }
+
     this->data = wuk::m_alloc<wByte *>(this->data_len);
     if (!this->data) {
         throw wuk::Exception(wuk::Error::MEMORY, "wuk::Buffer::Buffer",
@@ -316,6 +321,28 @@ void wuk::Buffer::append(const std::string content)
 {
     this->append(reinterpret_cast<const wByte *>(content.c_str()),
                 content.size());
+}
+
+template <typename T>
+void wuk::Buffer::append_number(T val)
+{
+    if constexpr (!std::is_integral_v<T> && !std::is_floating_point_v<T>) {
+        wuk::Exception(wuk::Error::ERR, "void wuk::Buffer::append_number",
+            "The parameter must be a number.");
+    }
+
+    wByte buffer[sizeof(T)];
+
+    memcpy(buffer, &val, sizeof(T));
+    if constexpr (WUK_IS_LITTLE_ENDIAN()) {
+        for (wU32 i = 0; i < (sizeof(T) >> 1); ++i) {
+            const wByte swap = buffer[i];
+            buffer[i] = buffer[sizeof(T) - i - 1];
+            buffer[sizeof(T) - i - 1] = swap;
+        }
+    }
+
+    this->append(buffer, sizeof(T));
 }
 
 void wuk::Buffer::shrink_to_fit()

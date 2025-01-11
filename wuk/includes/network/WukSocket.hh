@@ -2,118 +2,66 @@
 #include <config/WukConfig.hh>
 
 #if WUK_SUPPORT
-#include <network/WukException.hh>
-#include <cmath>
-
-#if defined(WUK_PLATFORM_LINUX)
-#   include <netdb.h>
-#   include <unistd.h>
-#   include <sys/time.h>
-#   include <arpa/inet.h>
-#   include <sys/socket.h>
-#   include <netinet/in.h>
-#   include <netinet/ip.h>
-#   include <netinet/tcp.h>
-#   define WUK_NET_ERROR EOF              // 定义错误代码
-typedef struct sockaddr     SOCKADDR;     // 套接字地址结构
-typedef struct addrinfo     ADDRINFO;     // 域名解析结构
-typedef struct sockaddr_in  SOCKADDR_IN;  // IPv4网络结构
-typedef struct sockaddr_in6 SOCKADDR_IN6; // IPv6网络结构
-typedef wS32   wSocket;                   // wukNet的socket类型
-#elif defined(WUK_PLATFORM_WINOS)
-#   include <WS2tcpip.h>
-#   if defined(_MSC_VER)
-#       pragma comment(lib, "WS2_32")
-#   endif
-#   define WUK_NET_ERROR SOCKET_ERROR     // 定义错误代码
-typedef SOCKET wSocket;                   // wukNet的socket类型
-#endif /* WUK_PLATFORM_LINUX */
-
-#include <WukMemory.hh>
-
-namespace wuk {
-    namespace net {
-        // shutdown函数的参数
-        enum class SD_SW {
-#           if defined(WUK_PLATFORM_LINUX)
-            RECV = SHUT_RD,
-            SEND = SHUT_WR,
-            BOTH = SHUT_RDWR
-#           elif defined(WUK_PLATFORM_WINOS)
-            RECV = SD_RECEIVE,
-            SEND = SD_SEND,
-            BOTH = SD_BOTH
-#           endif
-        };
-
-        class LIBWUK_API IPEndPoint {
-        public:
-            std::string addr;
-            wU16 port;
-
-            IPEndPoint(std::string addr, wU16 port);
-            IPEndPoint();
-        };
-
-        class LIBWUK_API SocketOption {
-        public:
-            const void *val;
-            socklen_t val_len;
-
-            SocketOption(const void *val, socklen_t val_len);
-            SocketOption(socklen_t val);
-            SocketOption(std::string val);
-        };
-    }
-}
+#include <network/WukNetwork.hh>
+#include <network/WukIPEndPoint.hh>
+#include <network/WukSocketOptions.hh>
+#include <WukBuffer.hh>
 
 namespace wuk {
     namespace net {
         class LIBWUK_API Socket {
         private:
-            ADDRINFO    *get_addr_info(wS32 family, wS32 type, wS32 proto, std::string addr,
-                                    std::string serviceName);
-            ADDRINFO    _get_network_info(SOCKADDR *addr);
-            IPEndPoint  get_network_info(wSocket sockfd, wS32 family);
-            IPEndPoint  get_network_info(wS32 family, SOCKADDR *pAddr);
-            std::string network_addr_to_string_addr(wS32 family, const void *pAddr);
-            wU16        network_port_to_number_port(const wU16 port);
+            double _timeout; // 超时时间
+            wI32 _p_size;    // 单次传输的包的长度
+
+        private:
+            IPEndPoint client_info;
+            IPEndPoint listen_info;
+
+        private:
+            wSocket _fd;
+
+            wI32 _family;
+            wI32 _type;
+            wI32 _proto;
 
         public:
-            double timeout; // 超时时间
-            wSocket fd; // 套接字文件描述符
-            wS32 family; // 套接字网络家族
-            wS32 type;   // 套接字类型
-            wS32 proto;  // 套接字协议
-            wS32 t_size; // 单次传输长度
-
-            IPEndPoint lAddr; // 套接字绑定的本地IP端点
-            IPEndPoint rAddr; // 套接字绑定的远程IP端点
-
-            Socket(wS32 _family, wS32 _type, wS32 _proto = 0, wSocket _fd = EOF);
             Socket();
+            Socket(wI32 family, wI32 type, wI32 proto = 0, wSocket other_fd = WUK_NET_ERROR);
             ~Socket();
 
-            void setsockopt(int level, int optName, SocketOption opt);
-            void getsockopt(int level, int optName, SocketOption opt);
+        public:
+            ADDRINFO *get_addr_info(std::string addr, std::string service_name) const;
 
-            void settimeout(double _time);
+            void setsockopt(wI32 level, wI32 opt_name, wuk::net::SockOpt opt);
+            void getsockopt(wI32 level, wI32 opt_name, wuk::net::SockOpt &opt);
+
+            IPEndPoint getsockname(wSocket fd);
+            IPEndPoint getsockname();
+
+            void settimeout(double timeout_val);
+
             void connect(const std::string addr, const wU16 port);
             void bind(const std::string addr, const wU16 port);
-            void listen(const wS32 backlog);
-            Socket accept();
-            void send(const std::string content, const wS32 flag = 0);
-            void sendall(const std::string content, const wS32 flag = 0);
-            void sendto(const std::string content, IPEndPoint target,
-                        const wS32 flag = 0);
-            std::string recv(const wS32 len, const wS32 flag = 0);
-            std::string recvfrom(const wS32 len, SOCKADDR *from = nullptr,
-                        socklen_t *fromlen = nullptr, const wS32 flag = 0);
+            void listen(const wI32 backlog);
+            wuk::net::Socket accept();
+
+            void send(const wuk::Buffer buffer, const wI32 flag = 0);
+            void sendall(const wuk::Buffer buffer, const wI32 flag = 0);
+            void sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag = 0);
+
+            wuk::Buffer recv(const wI32 length, const wI32 flag = 0);
+            wuk::Buffer recvfrom(const wI32 length, wuk::net::IPEndPoint &from, const wI32 flag = 0);
+
+            void shutdown(const wI32 how);
             void shutdown(wuk::net::SD_SW how);
-            void shutdown(const wS32 how);
             void close();
+
+        public:
+            wSocket get_fileno() const;
+            wI32 get_transmission_length() const;
         };
     }
 }
 
-#endif /* WUK_SUPPORT */
+#endif
