@@ -256,23 +256,32 @@ wuk::Buffer &wuk::Buffer::operator+=(const wuk::Buffer other)
     return *this;
 }
 
-// bool wuk::Buffer::operator==(const wuk::Buffer &other)
-// {
-//     if (this == &other) {
-//         return true;
-//     }
+bool wuk::Buffer::operator==(const wuk::Buffer &other)
+{
+    if (this == &other) {
+        return true;
+    }
+    if (this->data_len != other.data_len) {
+        return false;
+    }
 
-//     if (this->data_len != other.data_len) {
-//         return false;
-//     }
+    for (wSize i = 0; i < this->data_len; ++i) {
+        if (this->data[i] != other.data[i]) {
+            return false;
+        }
+    }
 
-    
-// }
+    return true;
+}
 
-// bool wuk::Buffer::operator!=(const wuk::Buffer &other)
-// {
-    
-// }
+bool wuk::Buffer::operator!=(const wuk::Buffer &other)
+{
+    if (this == &other) {
+        return false;
+    }
+
+    return !(*this == other);
+}
 
 //////////////////////////////////////////////////////////////////////
 bool wuk::Buffer::is_empty()
@@ -359,7 +368,7 @@ const wByte *wuk::Buffer::get_data() const noexcept
     return this->data;
 }
 
-const char *wuk::Buffer::get_cStr() const noexcept
+const char *wuk::Buffer::get_cstr() const noexcept
 {
     return reinterpret_cast<const char *>(this->data);
 }

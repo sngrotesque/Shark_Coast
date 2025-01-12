@@ -21,10 +21,9 @@ namespace wuk {
         // 可以简单理解为这个指针指向的位置永远必须是`data + data_len`。
         wByte *data_offset;
 
-        wSize data_len;     // 代表实际长度
+        wSize data_len;     // 代表实际使用长度
         wSize data_size;    // 代表已申请的内存空间长度
 
-    // public:
         // 用于增加可用内存大小
         void expand_memory(wSize length);
         // 用于减少可用内存大小
@@ -82,7 +81,7 @@ namespace wuk {
 
     public:
         const wByte *get_data() const noexcept;
-        const char *get_cStr() const noexcept;
+        const char *get_cstr() const noexcept;
         wSize get_length() const noexcept;
         wSize get_size() const noexcept;
     };

@@ -64,13 +64,21 @@ void method_2()
 
     print_info(buffer);
 
-    cout << buffer.get_cStr() << endl;
+    cout << buffer.get_cstr() << endl;
+}
+
+void method_3()
+{
+    wuk::Buffer buffer1{"123"};
+    wuk::Buffer buffer2{"1233"};
+
+    (buffer1 == buffer2) ? (printf("true\n")) : (printf("false\n"));
 }
 
 int main()
 {
     try {
-        method_2();
+        method_3();
     } catch (wuk::Exception &e) {
         cout << e.what() << endl;
     }

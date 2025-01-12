@@ -153,45 +153,71 @@ wuk::net::Socket wuk::net::Socket::accept()
     return wuk::net::Socket(this->_family, this->_type, this->_proto, other_fd);
 }
 
-void wuk::net::Socket::send(const wuk::Buffer buffer, const wI32 flag)
+void wuk::net::Socket::send(const char *buffer, socklen_t length, const wI32 flag)
 {
-    this->_p_size = ::send(this->_fd, buffer.get_cStr(), buffer.get_length(), flag);
-
+    this->_p_size = ::send(this->_fd, buffer, length, flag);
     if (this->_p_size == WUK_NET_ERROR) {
         throw wuk::net::Exception("wuk::net::Socket::send");
     }
 }
 
-void wuk::net::Socket::sendall(const wuk::Buffer buffer, const wI32 flag)
+void wuk::net::Socket::sendall(const char *buffer, socklen_t length, const wI32 flag)
 {
-    wU32 retry_count{5};
+    wI32 retry_count{5};
 
-    const char *ptr = buffer.get_cStr();
-    wU32 size = static_cast<wU32>(buffer.get_length());
-
-    while (size) {
-        this->_p_size = ::send(this->_fd, ptr, size, flag);
-
-        if (this->_p_size == WUK_NET_ERROR) {
+    while (length) {
+        try {
+            this->send(buffer, length, flag);
+        } catch (wuk::net::Exception &e) {
             if (retry_count) {
                 retry_count--;
                 continue;
             }
             throw wuk::net::Exception("wuk::net::Socket::sendall");
         }
-
-        ptr  += this->_p_size;
-        size -= this->_p_size;
+        buffer += this->_p_size;
+        length -= this->_p_size;
     }
 }
 
-void wuk::net::Socket::sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag)
+void wuk::net::Socket::sendto(const char *buffer, socklen_t length,
+                            wuk::net::IPEndPoint &target, const wI32 flag)
 {
-    this->_p_size = ::sendto(this->_fd, buffer.get_cStr(), buffer.get_length(), flag,
+    this->_p_size = ::sendto(this->_fd, buffer, length, flag,
                             target.get_ai_addr(), target.get_ai_addrlen());
     if (this->_p_size == WUK_NET_ERROR) {
         throw wuk::net::Exception("wuk::net::Socket::sendto");
     }
+}
+
+void wuk::net::Socket::send(const wuk::Buffer buffer, const wI32 flag)
+{
+    this->send(buffer.get_cstr(), buffer.get_length(), flag);
+}
+
+void wuk::net::Socket::sendall(const wuk::Buffer buffer, const wI32 flag)
+{
+    this->sendall(buffer.get_cstr(), buffer.get_length(), flag);
+}
+
+void wuk::net::Socket::sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag)
+{
+    this->sendto(buffer.get_cstr(), buffer.get_length(), target, flag);
+}
+
+void wuk::net::Socket::send(const std::string buffer, const wI32 flag)
+{
+    this->send(buffer.c_str(), buffer.length(), flag);
+}
+
+void wuk::net::Socket::sendall(const std::string buffer, const wI32 flag)
+{
+    this->sendall(buffer.c_str(), buffer.length(), flag);
+}
+
+void wuk::net::Socket::sendto(const std::string buffer, wuk::net::IPEndPoint &target, const wI32 flag)
+{
+    this->sendto(buffer.c_str(), buffer.length(), target, flag);
 }
 
 wuk::Buffer wuk::net::Socket::recv(const wI32 length, const wI32 flag)

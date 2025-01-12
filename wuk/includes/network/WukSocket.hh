@@ -47,9 +47,19 @@ namespace wuk {
             void listen(const wI32 backlog);
             wuk::net::Socket accept();
 
+            // 如果为flag设置一个默认值，那存在匹配到`send(const std::string buffer, const wI32 flag = 0);`的可能性。
+            // 之所以实现这个类型的方法重载，是为了在使用之后的send重载时避免编写重复代码，因此flag必须不能有默认值。
+            void send(const char *buffer, socklen_t length, const wI32 flag);
+            void sendall(const char *buffer, socklen_t length, const wI32 flag);
+            void sendto(const char *buffer, socklen_t length, wuk::net::IPEndPoint &target, const wI32 flag);
+
             void send(const wuk::Buffer buffer, const wI32 flag = 0);
             void sendall(const wuk::Buffer buffer, const wI32 flag = 0);
             void sendto(const wuk::Buffer buffer, wuk::net::IPEndPoint &target, const wI32 flag = 0);
+
+            void send(const std::string buffer, const wI32 flag = 0);
+            void sendall(const std::string buffer, const wI32 flag = 0);
+            void sendto(const std::string buffer, wuk::net::IPEndPoint &target, const wI32 flag = 0);
 
             wuk::Buffer recv(const wI32 length, const wI32 flag = 0);
             wuk::Buffer recvfrom(const wI32 length, wuk::net::IPEndPoint &from, const wI32 flag = 0);
