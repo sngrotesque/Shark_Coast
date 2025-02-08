@@ -31,7 +31,7 @@ namespace udp {
 
         recvBuffer = fd.recvfrom(4096, client);
 
-        cout << recvBuffer.get_cStr() << endl;
+        cout << recvBuffer.get_cstr() << endl;
 
         fd.sendto(sendBuffer, client);
 
@@ -50,7 +50,7 @@ namespace udp {
         fd.sendto(sendBuffer, pointer);
 
         recvBuffer = fd.recvfrom(256, pointer);
-        cout << recvBuffer.get_cStr() << endl;
+        cout << recvBuffer.get_cstr() << endl;
 
         fd.shutdown(wuk::net::SD_SW::BOTH);
         fd.close();
@@ -86,7 +86,7 @@ void with_python()
     fd.connect("www.baidu.com", 80);
 
     cout << "socket fd: " << fd.get_fileno() << endl;
-    system("pause");
+    // system("pause");
 
     fd.close();
 }

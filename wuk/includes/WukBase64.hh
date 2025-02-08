@@ -11,11 +11,14 @@ namespace wuk {
     private:
         bool strict_mode;
 
+    private:
         wSize get_encode_length(wSize length);
         wSize get_decode_length(wSize length);
+
     public:
         Base64(bool strict_mode = false);
 
+    public:
         char *encode(const wByte *buffer, wSize &length);
         wByte *decode(const char *buffer, wSize &length);
 

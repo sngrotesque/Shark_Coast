@@ -29,16 +29,21 @@ void wuk::Time::sleep(double _t)
 
 double wuk::Time::time()
 {
-#   if defined(WUK_PLATFORM_WINOS)
-    FILETIME ft;
-    LARGE_INTEGER li{};
-    GetSystemTimeAsFileTime(&ft);
-    li.LowPart = ft.dwLowDateTime;
-    li.HighPart = ft.dwHighDateTime;
-    return ((li.QuadPart - 116444736e9) / 10) / 1.e6;
-#   elif defined(WUK_PLATFORM_LINUX)
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1e6 + tv.tv_usec) / 1.e6;
-#   endif
+    // 旧实现
+// #   if defined(WUK_PLATFORM_WINOS)
+//     FILETIME ft;
+//     LARGE_INTEGER li{};
+//     GetSystemTimeAsFileTime(&ft);
+//     li.LowPart = ft.dwLowDateTime;
+//     li.HighPart = ft.dwHighDateTime;
+//     return ((li.QuadPart - 116444736e9) / 10) / 1.e6;
+// #   elif defined(WUK_PLATFORM_LINUX)
+//     struct timeval tv;
+//     gettimeofday(&tv, NULL);
+//     return (tv.tv_sec * 1e6 + tv.tv_usec) / 1.e6;
+// #   endif
+    // C++新实现
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    return std::chrono::duration<double>(duration).count();
 }

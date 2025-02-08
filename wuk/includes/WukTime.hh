@@ -6,6 +6,7 @@
 #include <WukMemory.hh>
 #include <sys/timeb.h>
 #include <time.h>
+#include <chrono>
 
 #ifdef WUK_PLATFORM_WINOS
 #include <Windows.h>

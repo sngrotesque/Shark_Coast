@@ -94,8 +94,6 @@ char *wuk::Base64::encode(const wByte *buffer, wSize &length)
 */
 wByte *wuk::Base64::decode(const char *buffer, wSize &length)
 {
-    std::string error_message;
-
     const wByte *ascii_data = reinterpret_cast<const wByte *>(buffer);
     const wSize  ascii_len  = length;
     bool  padding_started   = 0;
@@ -114,8 +112,9 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
     wByte this_ch;      // 用于储存单个传入的已编码字符
 
     if(strict_mode && (ascii_len > 0) && (*ascii_data == BASE64PAD)) {
-        error_message = "Leading padding not allowed.";
-        goto error_end;
+        wuk::m_free(bin_data_start);
+        throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+            "Leading padding not allowed.");
     }
 
     for(wSize i = 0; i < ascii_len; ++i) {
@@ -125,8 +124,9 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
             padding_started = true;
 
             if(strict_mode && (!quad_pos)) {
-                error_message = "Excess padding not allowed.";
-                goto error_end;
+                wuk::m_free(bin_data_start);
+                throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+                    "Excess padding not allowed.");
             }
 
             if((quad_pos >= 2) && (quad_pos + (++pads) >= 4)) {
@@ -135,8 +135,9 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
                  * 在严格模式下，如果填充后有多余的数据，则会引发错误。
                  */
                 if(strict_mode && ((i + 1) < ascii_len)) {
-                    error_message = "Excess data after padding.";
-                    goto error_end;
+                    wuk::m_free(bin_data_start);
+                    throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+                        "Excess data after padding.");
                 }
 
                 goto done;
@@ -148,15 +149,17 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
         this_ch = b64de_table[this_ch];
         if(this_ch == 255) {
             if(strict_mode) {
-                error_message = "Only base64 data is allowed.";
-                goto error_end;
+                wuk::m_free(bin_data_start);
+                throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+                    "Only base64 data is allowed.");
             }
             continue;
         }
 
         if(strict_mode && padding_started) {
-            error_message = "Discontinuous padding not allowed.";
-            goto error_end;
+            wuk::m_free(bin_data_start);
+            throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+                "Discontinuous padding not allowed.");
         }
 
         pads = 0;
@@ -186,27 +189,40 @@ wByte *wuk::Base64::decode(const char *buffer, wSize &length)
 
     if(quad_pos) {
         if(quad_pos == 1) {
-            char tmpMsg[128]{};
-            snprintf(tmpMsg, sizeof(tmpMsg),
+            wSize val = (bin_data - bin_data_start) / 3 * 4 + 1;
+            wuk::m_free(bin_data_start);
+#           ifndef WUK_STD_CPP_20
+            char err_msg[256]{};
+            snprintf(err_msg, sizeof(err_msg),
                     "Invalid base64-encoded string: "
                     "number of data characters (%zd) cannot be 1 more "
-                    "than a multiple of 4",
-                    (bin_data - bin_data_start) / 3 * 4 + 1);
-            error_message = tmpMsg;
-            goto error_end;
+                    "than a multiple of 4", val);
+#           else
+            std::string _msg = std::format(
+                    "Invalid base64-encoded string: "
+                    "number of data characters ({0}) cannot be 1 more "
+                    "than a multiple of 4", val);
+            const char *err_msg = _msg.c_str();
+#           endif
+            throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+                                err_msg);
         } else {
-            error_message = "Incorrect padding.";
-            goto error_end;
+            throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+                "Incorrect padding.");
         }
     }
-error_end:
-    wuk::m_free(bin_data_start);
-    throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode", error_message.c_str());
 
 done:
     length = bin_data - bin_data_start;
-    bin_data_start[length] = 0x0;
-    return bin_data_start;
+
+    wByte *result_bin = wuk::m_realloc<wByte *>(bin_data_start, length + 1);
+    if (!result_bin) {
+        throw wuk::Exception(wuk::Error::ERR, "wuk::Base64::decode",
+            "Failed to allocate memory for result_bin.");
+    }
+
+    result_bin[length] = 0x0;
+    return result_bin;
 }
 
 std::string wuk::Base64::encode(std::string _buffer)
@@ -236,6 +252,38 @@ std::string wuk::Base64::decode(std::string _buffer)
     wByte *result = this->decode(buffer, length);
 
     std::string _result{reinterpret_cast<char *>(result), length};
+    wuk::m_free(result);
+
+    return _result;
+}
+
+wuk::Buffer wuk::Base64::encode(wuk::Buffer _buffer)
+{
+    if (_buffer.is_empty()) {
+        return wuk::Buffer{};
+    }
+
+    wByte *buffer = const_cast<wByte *>(_buffer.get_data());
+    wSize length = _buffer.get_length();
+    char *result = this->encode(buffer, length);
+
+    wuk::Buffer _result{reinterpret_cast<wByte *>(result), length};
+    wuk::m_free(result);
+
+    return _result;
+}
+
+wuk::Buffer wuk::Base64::decode(wuk::Buffer _buffer)
+{
+    if (_buffer.is_empty()) {
+        return wuk::Buffer{};
+    }
+
+    const char *buffer = _buffer.get_cstr();
+    wSize length = _buffer.get_length();
+    wByte *result = this->decode(buffer, length);
+
+    wuk::Buffer _result{reinterpret_cast<wByte *>(result), length};
     wuk::m_free(result);
 
     return _result;

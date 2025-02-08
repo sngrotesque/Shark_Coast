@@ -162,6 +162,13 @@ void wuk::crypto::FEA::xor_with_iv(wByte *block, wByte *iv)
 
 void wuk::crypto::FEA::cipher(wByte *p, wByte *roundKey)
 {
+    /*
+    * 来自DeepSeek的建议：将顺序改变一下，改为。
+    * 1，明文与密钥异或
+    * 2，执行shift_rows操作。
+    * 3，执行shift_bits操作。
+    * 4，执行sub_bytes操作。
+    */
     wU32 r, i;
     wByte *subkey = nullptr;
     for(r = 0; r < WUK_FEA_NR; ++r) {
@@ -206,15 +213,15 @@ void wuk::crypto::FEA::inv_cipher(wByte *c, wByte *roundKey)
 
 void wuk::crypto::FEA::key_extension(const wByte *key, const wByte *iv)
 {
-    wByte keyBuffer[sizeof(this->key)];
-    wByte ivBuffer[sizeof(this->iv)];
+    wByte keyBuffer[WUK_FEA_KEYLEN];
+    wByte ivBuffer[WUK_FEA_IVLEN];
     wU32 rkIndex, index;
 
-    memcpy(keyBuffer, key, sizeof(this->key));
-    memcpy(ivBuffer, iv, sizeof(this->iv));
+    memcpy(keyBuffer, key, WUK_FEA_KEYLEN);
+    memcpy(ivBuffer, iv, WUK_FEA_IVLEN);
 
-    for(rkIndex = 0; rkIndex < sizeof(this->roundKey); rkIndex += sizeof(this->key)) {
-        memcpy(this->roundKey + rkIndex, keyBuffer, sizeof(this->key));
+    for(rkIndex = 0; rkIndex < sizeof(this->roundKey); rkIndex += WUK_FEA_KEYLEN) {
+        memcpy(this->roundKey + rkIndex, keyBuffer, WUK_FEA_KEYLEN);
 
         this->sub_bytes(keyBuffer);
         this->sub_bytes(keyBuffer + WUK_FEA_BL);
@@ -226,7 +233,7 @@ void wuk::crypto::FEA::key_extension(const wByte *key, const wByte *iv)
             ivBuffer[index] ^= (keyBuffer[index] ^ keyBuffer[index + 16]);
         }
 
-        for(index = 0; index < sizeof(this->key); ++index) {
+        for(index = 0; index < WUK_FEA_KEYLEN; ++index) {
             keyBuffer[index] ^= 
                 ivBuffer[0]  ^ ivBuffer[1]  ^ ivBuffer[2]  ^ ivBuffer[3]  ^
                 ivBuffer[4]  ^ ivBuffer[5]  ^ ivBuffer[6]  ^ ivBuffer[7]  ^
@@ -238,48 +245,42 @@ void wuk::crypto::FEA::key_extension(const wByte *key, const wByte *iv)
         this->sub_bytes(ivBuffer);
         this->shift_bits(ivBuffer);
 
-        for(index = 0; index < sizeof(this->key); ++index) {
-            keyBuffer[index] ^= \
+        for(index = 0; index < WUK_FEA_KEYLEN; ++index) {
+            keyBuffer[index] ^= 
                 ivBuffer[0] ^ ivBuffer[2]  ^ ivBuffer[4]  ^ ivBuffer[6] ^
                 ivBuffer[8] ^ ivBuffer[10] ^ ivBuffer[12] ^ ivBuffer[14];
-            keyBuffer[index] ^= \
+            keyBuffer[index] ^= 
                 ivBuffer[1] ^ ivBuffer[3]  ^ ivBuffer[5]  ^ ivBuffer[7] ^
                 ivBuffer[9] ^ ivBuffer[11] ^ ivBuffer[13] ^ ivBuffer[15];
         }
 
         this->shift_bits(keyBuffer);
-        this->sub_bytes(keyBuffer);
         this->shift_bits(keyBuffer + WUK_FEA_BL);
+
+        this->sub_bytes(keyBuffer);
         this->sub_bytes(keyBuffer + WUK_FEA_BL);
     }
 
-    wuk::memory_secure(keyBuffer, sizeof(this->key));
-    wuk::memory_secure(ivBuffer, sizeof(this->iv));
+    wuk::memory_secure(keyBuffer, WUK_FEA_KEYLEN);
+    wuk::memory_secure(ivBuffer, WUK_FEA_IVLEN);
 }
+
 //////////////////////////////////////////////////////////
 wuk::crypto::FEA::FEA()
-: key(), iv(), roundKey(), counter(), segmentSize(128)
+: roundKey(), counter(), segmentSize(128)
 {
     
 }
 
 wuk::crypto::FEA::FEA(const wByte *key, const wByte *iv, wuk::crypto::Counter counter, const wU32 segmentSize)
-: key(), iv(), roundKey(), counter(counter), segmentSize(segmentSize)
+: roundKey(), counter(counter), segmentSize(segmentSize)
 {
     if(!key || !iv) {
         throw wuk::Exception(wuk::Error::NPTR, "wuk::crypto::FEA::fea",
-                                        "key or iv is NULL.");
+                            "key or iv is NULL.");
     }
-    memcpy(this->key, key, sizeof(this->key));
-    memcpy(this->iv, iv, sizeof(this->iv));
-
-    this->key_extension(this->key, this->iv);
-}
-
-wuk::crypto::FEA::~FEA()
-{
-    wuk::memory_secure(this->key, sizeof(this->key));
-    wuk::memory_secure(this->iv, sizeof(this->iv));
+    memcpy(this->iv, iv, WUK_FEA_IVLEN);
+    this->key_extension(key, iv);
 }
 
 void wuk::crypto::FEA::encrypt(wByte *content, wSize size, mode mode)

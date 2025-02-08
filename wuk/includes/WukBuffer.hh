@@ -35,12 +35,13 @@ namespace wuk {
         // 构造函数
         Buffer();
         Buffer(const wuk::Buffer &other);
-        Buffer(wuk::Buffer &&other);
-
+        Buffer(wuk::Buffer &&other) noexcept;
         // 给予数据的构造函数
         Buffer(const wByte *content, wSize length);
         // 申请指定大小内存空间备用的构造函数
         Buffer(wSize memory_size);
+        // 兼容std::string
+        Buffer(const std::string &content);
 
         // 析构函数
         ~Buffer();
@@ -51,8 +52,6 @@ namespace wuk {
         // 移动赋值运算符
         wuk::Buffer &operator=(wuk::Buffer &&other) noexcept;
 
-        // 兼容std::string
-        Buffer(const std::string &content);
         wuk::Buffer &operator=(const std::string &other_string);
         wuk::Buffer &operator=(std::string &&other_string);
 
@@ -67,6 +66,9 @@ namespace wuk {
         bool is_empty();
         // 在需要写入指定长度的大小的内容且同时需要指针的情况下调用此方法
         wByte *append_write(wSize length);
+        // 直接写入，从指针起始处写入，覆盖原数据，不追加。
+        void write(const wByte *content, wSize length);
+        void write(std::string other_string);
         // 追加写入，可用于直接追加和已申请空间的情况下
         void append(const wByte *content, wSize length);
         void append(const std::string content);

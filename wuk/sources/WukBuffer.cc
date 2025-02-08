@@ -14,8 +14,6 @@
 * 此方法应该优化一下
 * data_size长度在需要扩展的情况下应该始终与最终的data_len长度同齐；
 * （指调用后，但不要在内部使用shrink_to_fit方法）
-*
-* 在实现了append方法可用情况之后记得测试一下operator+方法。
 */
 void wuk::Buffer::expand_memory(wSize length)
 {
@@ -102,7 +100,7 @@ wuk::Buffer::Buffer(const wuk::Buffer &other)
     this->data_offset = this->data + offset_val;
 }
 
-wuk::Buffer::Buffer(wuk::Buffer &&other)
+wuk::Buffer::Buffer(wuk::Buffer &&other) noexcept
 : data(nullptr), data_offset(nullptr), data_len(other.data_len), data_size(other.data_size)
 {
     this->data = other.data;
@@ -142,6 +140,12 @@ wuk::Buffer::Buffer(wSize memory_size)
     wuk::memory_zero(this->data, this->data_size);
 
     this->data_offset = this->data;
+}
+
+wuk::Buffer::Buffer(const std::string &content)
+: Buffer(reinterpret_cast<const wByte *>(content.c_str()), content.size())
+{
+    
 }
 
 wuk::Buffer::~Buffer()
@@ -186,12 +190,6 @@ wuk::Buffer &wuk::Buffer::operator=(wuk::Buffer &&other) noexcept
     other.data_size = 0;
 
     return *this;
-}
-
-wuk::Buffer::Buffer(const std::string &content)
-: Buffer(reinterpret_cast<const wByte *>(content.c_str()), content.size())
-{
-    
 }
 
 wuk::Buffer &wuk::Buffer::operator=(const std::string &other_string)
@@ -286,7 +284,7 @@ bool wuk::Buffer::operator!=(const wuk::Buffer &other)
 //////////////////////////////////////////////////////////////////////
 bool wuk::Buffer::is_empty()
 {
-    return (!this->data_len || !this->data);
+    return ((!this->data) || (!this->data_len) || (!this->data_size));
 }
 
 /**
@@ -299,7 +297,7 @@ bool wuk::Buffer::is_empty()
  */
 wByte *wuk::Buffer::append_write(wSize length)
 {
-    if(!this->is_memory_sufficient(length)) {
+    if (!this->is_memory_sufficient(length)) {
         this->expand_memory(length);
     }
 
@@ -309,14 +307,37 @@ wByte *wuk::Buffer::append_write(wSize length)
     return this->data_offset - length;
 }
 
+void wuk::Buffer::write(const wByte *content, wSize length)
+{
+    if (!content) {
+        throw wuk::Exception(wuk::Error::NPTR, "wuk::Buffer::write",
+            "content in nullptr.");
+    }
+
+    if (!this->is_memory_sufficient(length)) {
+        this->expand_memory(length);
+    }
+
+    memcpy(this->data, content, length);
+
+    this->data_offset = this->data + length;
+    this->data_len = length;
+}
+
+void wuk::Buffer::write(std::string other_string)
+{
+    this->write(reinterpret_cast<const wByte *>(other_string.c_str()),
+                other_string.size());
+}
+
 void wuk::Buffer::append(const wByte *content, wSize length)
 {
-    if(!content) {
+    if (!content) {
         throw wuk::Exception(wuk::Error::NPTR, "wuk::Buffer::append",
             "content in nullptr.");
     }
 
-    if(!this->is_memory_sufficient(length)) {
+    if (!this->is_memory_sufficient(length)) {
         this->expand_memory(length);
     }
 
@@ -328,6 +349,11 @@ void wuk::Buffer::append(const wByte *content, wSize length)
 
 void wuk::Buffer::append(const std::string content)
 {
+    if (content.empty()) {
+        throw wuk::Exception(wuk::Error::NODAT, "wuk::Buffer::append",
+            "the content is empty.");
+    }
+
     this->append(reinterpret_cast<const wByte *>(content.c_str()),
                 content.size());
 }

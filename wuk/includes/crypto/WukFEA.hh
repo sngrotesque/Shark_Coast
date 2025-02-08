@@ -7,14 +7,24 @@
 
 #include <crypto/WukUtils.hh>
 
-#define WUK_FEA_NB 4
-#define WUK_FEA_NK 4
-#define WUK_FEA_NR 4
+// #define WUK_FEA_NB 4
+// #define WUK_FEA_NK 4
+// #define WUK_FEA_NR 4
 
-#define WUK_FEA_BL 16 // WUK FEA Block length
+// #define WUK_FEA_BL 16 // WUK FEA Block length
+
+// #define WUK_FEA_KEYLEN 32
+// #define WUK_FEA_IVLEN  16
 
 namespace wuk {
     namespace crypto {
+        constexpr wU32 WUK_FEA_NB     = 4;
+        constexpr wU32 WUK_FEA_NK     = 4;
+        constexpr wU32 WUK_FEA_NR     = 4;
+        constexpr wU32 WUK_FEA_BL     = 16; // FEA block length
+        constexpr wU32 WUK_FEA_KEYLEN = 32;
+        constexpr wU32 WUK_FEA_IVLEN  = 16;
+
         enum class mode {
             ECB,  // Electronic Codebook
             CBC,  // Cipher block chaining
@@ -34,13 +44,13 @@ namespace wuk {
         */
         class LIBWUK_API FEA {
         private:
-            wByte key[WUK_FEA_BL << 1];
-            wByte iv[WUK_FEA_BL];
-            wByte roundKey[sizeof(key) * WUK_FEA_NR];
+            wByte iv[WUK_FEA_IVLEN];
+            wByte roundKey[WUK_FEA_KEYLEN * WUK_FEA_NR];
 
             wuk::crypto::Counter counter;
             wU32 segmentSize;
 
+        private:
             void sub_bytes(wByte *block);
             void shift_bits(wByte *block);
 
@@ -73,7 +83,8 @@ namespace wuk {
             FEA(const wByte *key, const wByte *iv,
                 wuk::crypto::Counter counter = {},
                 const wU32 segmentSize = 128);
-            ~FEA();
+
+        public:
             void encrypt(wByte *content, wSize size, mode mode);
             void decrypt(wByte *content, wSize size, mode mode);
         };

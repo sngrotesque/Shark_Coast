@@ -1,75 +1,112 @@
 #include <WukPadding.hh>
 
-void wuk::pad(wByte *src, wSize &size, wU32 blockSize, bool randVal)
+void throw_nullptr(const char *function)
 {
-    if(!src) {
-        throw wuk::Exception(wuk::Error::NPTR, "wuk::pad", "src is NULL.");
+    throw wuk::Exception(wuk::Error::NPTR, function,
+            "data is nullptr.");
+}
+
+void wuk::pad(wByte *data, wSize &length, wU32 blockSize)
+{
+    if(!data) {
+        throw_nullptr("wuk::pad");
     }
     wU32 padLen;
     wSize totalLen;
     wuk::Random random;
 
-    padLen = (blockSize - size % blockSize);
-    totalLen = padLen + size;
+    padLen = (blockSize - length % blockSize);
+    totalLen = padLen + length;
 
-    if(randVal) {
-        std::string tmp = random.urandom(padLen - 1);
-        memcpy(src + size, tmp.c_str(), padLen - 1);
-    } else {
-        memset(src + size, 0xac, padLen - 1);
-    }
+    memset(data + length, 0xac, padLen - 1);
 
-    src[(size = totalLen) - 1] = padLen & 0xff;
+    data[(length = totalLen) - 1] = padLen & 0xff;
 }
 
-void wuk::unpad(wByte *src, wSize &size)
+void wuk::unpad(wByte *data, wSize &length)
 {
-    if(!src) {
-        throw wuk::Exception(wuk::Error::NPTR, "wuk::pad", "src is NULL.");
+    if(!data) {
+        throw_nullptr("wuk::unpad");
     }
     wSize padLen;
     wSize index;
 
-    padLen = src[size - 1];
+    padLen = data[length - 1];
 
-    for(index = size - padLen; index < size; ++index)
-        src[index] = 0x00;
+    for(index = length - padLen; index < length; ++index)
+        data[index] = 0x00;
 
-    size = size - padLen;
+    length = length - padLen;
 }
 
-wByte *wuk::pkcs7_pad(const wByte *src, wSize &size, wU32 blockSize)
+wByte *wuk::pkcs7_pad(const wByte *data, wSize &length, wU32 blockSize)
 {
-    if(!src) {
-        throw wuk::Exception(wuk::Error::NPTR, "wuk::pkcs7_pad", "src is NULL.");
+    if(!data) {
+        throw_nullptr("wuk::pkcs7_pad");
     }
     wU32 padLen;
     wSize totalLen;
 
-    padLen = blockSize - size % blockSize;
-    totalLen = size + padLen;
+    padLen = blockSize - length % blockSize;
+    totalLen = length + padLen;
 
     wByte *padded = wuk::m_alloc<wByte *>(totalLen);
-    memcpy(padded, src, size);
-    memset(padded + size, padLen, padLen);
+    memcpy(padded, data, length);
+    memset(padded + length, padLen, padLen);
 
-    size = totalLen;
+    length = totalLen;
 
     return padded;
 }
 
-wByte *wuk::pkcs7_unpad(const wByte *src, wSize &size)
+wByte *wuk::pkcs7_unpad(const wByte *data, wSize &length)
 {
-    if(!src) {
-        throw wuk::Exception(wuk::Error::NPTR, "wuk::pkcs7_unpad", "src is NULL.");
+    if(!data) {
+        throw_nullptr("wuk::pkcs7_unpad");
     }
-    wU32 padLen = src[size - 1];
-    wSize unpaddedLen = size - padLen;
+    wU32 padLen = data[length - 1];
+    wSize unpaddedLen = length - padLen;
 
     wByte *unpadded = wuk::m_alloc<wByte *>(unpaddedLen);
-    memcpy(unpadded, src, unpaddedLen);
+    memcpy(unpadded, data, unpaddedLen);
 
-    size = unpaddedLen;
+    length = unpaddedLen;
+
+    return unpadded;
+}
+
+wByte *wuk::x923_pad(const wByte *data, wSize &length, wU32 blockSize)
+{
+    if (!data) {
+        throw_nullptr("wuk::x923_pad");
+    }
+
+    wU32 padLen = blockSize - length % blockSize;
+    wSize totalLen = length + padLen;
+
+    wByte *padded = wuk::m_alloc<wByte *>(totalLen);
+    memcpy(padded, data, length);
+    memset(padded + length, 0x00, padLen);
+    padded[totalLen - 1] = padLen;
+
+    length = totalLen;
+
+    return padded;
+}
+
+wByte *wuk::x923_unpad(const wByte *data, wSize &length)
+{
+    if (!data) {
+        throw_nullptr("wuk::x923_unpad");
+    }
+
+    wU32 padLen = data[length - 1];
+    wSize unpaddedLen = length - padLen;
+
+    wByte *unpadded = wuk::m_alloc<wByte *>(unpaddedLen);
+    memcpy(unpadded, data, unpaddedLen);
+
+    length = unpaddedLen;
 
     return unpadded;
 }

@@ -1,7 +1,6 @@
 // python make.py test\main.cc -DWUK_EXPORTS -lws2_32 -lz -lssl -lcrypto
 #include <config/WukConfig.hh>
 
-#include <network/WukException.cc>
 #include <network/WukSocket.cc>
 #include <network/WukPacket.cc>
 

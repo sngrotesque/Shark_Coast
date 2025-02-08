@@ -17,12 +17,7 @@ namespace wuk {
             Counter(const char *nonce, wU32 size, wSize begin = 1);
             Counter(std::string nonce, wSize begin = 1);
 
-            Counter(const Counter &other) noexcept;
-            Counter(Counter &&other) noexcept;
-
-            Counter &operator=(const Counter &other);
-            Counter &operator=(Counter &&other);
-
+        public:
             wByte *get() noexcept;
             void clean() noexcept;
         };

@@ -10,7 +10,10 @@ namespace wuk {
     private:
         wByte to_top(wByte c);
         wByte to_bot(wByte c);
+
     public:
+        Binascii() = default;
+
         char *b2a_hex(const wByte *buffer, wSize &length);
         wByte *a2b_hex(const char *buffer, wSize &length);
 

@@ -1,7 +1,17 @@
+#include <network/WukSocket.hh>
+#include <network/WukIPEndPoint.hh>
+#include <network/WukSocketOptions.hh>
+
 #include <WukBuffer.hh>
+#include <WukBase64.hh>
 #include <WukMisc.hh>
 
+#include <network/WukSocket.cc>
+#include <network/WukIPEndPoint.cc>
+#include <network/WukSocketOptions.cc>
+
 #include <WukBuffer.cc>
+#include <WukBase64.cc>
 #include <WukMisc.cc>
 
 #include <iostream>
@@ -75,10 +85,49 @@ void method_3()
     (buffer1 == buffer2) ? (printf("true\n")) : (printf("false\n"));
 }
 
+void method_4()
+{
+    wuk::Base64 base64;
+
+    wuk::Buffer buffer{"XFwoVXdVKS8="};
+    wuk::Buffer result = base64.decode(buffer);
+
+    cout << result.get_cstr() << endl;
+}
+
+void method_5()
+{
+    char _1[32] = {"this is write method.\n"};
+    char _2[64] = {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+    wuk::Buffer buffer{4096};
+
+    buffer.write(reinterpret_cast<wByte *>(_1), strlen(_1));
+    buffer.append("this is append method.\n");
+
+    buffer.write(reinterpret_cast<wByte *>(_2), strlen(_2));
+
+    buffer.write(reinterpret_cast<wByte *>(_1), strlen(_1));
+
+    buffer.write("a data.");
+
+    wuk::misc::print_pybytes(buffer.get_data(), buffer.get_length(), true);
+}
+
+void method_6()
+{
+    wuk::net::Socket fd{AF_INET, SOCK_STREAM, IPPROTO_TCP};
+    fd.connect("passport.bilibili.com", 80);
+    fd.send("GET /qrcode/getLoginUrl HTTP/1.1\r\n"
+            "Host: passport.bilibili.com\r\n"
+            "User-Agent: Android\r\n\r\n");
+    cout << fd.recv(4096).get_cstr() << endl;
+    fd.close();
+}
+
 int main()
 {
     try {
-        method_3();
+        method_6();
     } catch (wuk::Exception &e) {
         cout << e.what() << endl;
     }

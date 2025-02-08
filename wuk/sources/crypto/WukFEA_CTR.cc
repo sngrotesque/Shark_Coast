@@ -2,7 +2,7 @@
 
 static void nonce_add(wByte *counter)
 {
-    for(wS32 ctr_i = (WUK_FEA_BL - 1); ctr_i >= 0; --ctr_i) {
+    for(wS32 ctr_i = (wuk::crypto::WUK_FEA_BL - 1); ctr_i >= 0; --ctr_i) {
         if(*(counter + ctr_i) == 0xff) {
             *(counter + ctr_i) = 0x00;
         } else {

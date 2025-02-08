@@ -18,8 +18,9 @@ namespace wuk {
         OK     = 0, // 一切正常，无异常
         ERR    = 1, // 一切暂时无法定义的异常
         NPTR   = 2, // 调用空指针异常
-        MEMORY = 3, // 内存管理异常
-        FNOTF  = 4, // 文件未找到（File not found）
+        NODAT  = 3, // 空数据异常
+        MEMORY = 4, // 内存管理异常
+        FNOTF  = 5, // 文件未找到（File not found）
     } Error;
 
     class LIBWUK_API Exception {
