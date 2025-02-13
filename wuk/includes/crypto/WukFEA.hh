@@ -18,12 +18,12 @@
 
 namespace wuk {
     namespace crypto {
+        constexpr wU32 WUK_FEA_KEYLEN = 32;
+        constexpr wU32 WUK_FEA_IVLEN  = 16;
+        constexpr wU32 WUK_FEA_BL     = 16; // FEA block length
         constexpr wU32 WUK_FEA_NB     = 4;
         constexpr wU32 WUK_FEA_NK     = 4;
         constexpr wU32 WUK_FEA_NR     = 4;
-        constexpr wU32 WUK_FEA_BL     = 16; // FEA block length
-        constexpr wU32 WUK_FEA_KEYLEN = 32;
-        constexpr wU32 WUK_FEA_IVLEN  = 16;
 
         enum class mode {
             ECB,  // Electronic Codebook
@@ -87,6 +87,10 @@ namespace wuk {
         public:
             void encrypt(wByte *content, wSize size, mode mode);
             void decrypt(wByte *content, wSize size, mode mode);
+
+        public:
+            void set_counter(wuk::crypto::Counter counter);
+            void set_segment_size(wU32 segment_size);
         };
     }
 }

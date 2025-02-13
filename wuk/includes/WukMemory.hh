@@ -5,6 +5,7 @@
 #ifdef WUK_PLATFORM_WINOS
 #   include <Windows.h>
 #endif
+#include <malloc.h>
 
 namespace wuk {
     LIBWUK_API void memory_zero(void *p, wSize n)

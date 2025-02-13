@@ -124,10 +124,19 @@ void method_6()
     fd.close();
 }
 
+void method_7()
+{
+    wuk::Buffer buffer;
+
+    buffer.append_number(4);
+
+    wuk::misc::print_hex(buffer.get_data(), buffer.get_length(), 16, true, false);
+}
+
 int main()
 {
     try {
-        method_6();
+        method_7();
     } catch (wuk::Exception &e) {
         cout << e.what() << endl;
     }

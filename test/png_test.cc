@@ -96,7 +96,7 @@ void test()
     wuk::misc::print_hex(png.get_data(), png.get_length(), 16, 1, 0);
     
     fstream f{filesystem::path{"F:/test.png"}, ios::binary | ios::out};
-    f.write(png.get_cStr(), png.get_length());
+    f.write(png.get_cstr(), png.get_length());
     f.close();
 }
 

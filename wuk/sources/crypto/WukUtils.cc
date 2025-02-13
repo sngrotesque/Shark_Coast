@@ -1,15 +1,8 @@
 #include <crypto/WukUtils.hh>
 
-wuk::crypto::Counter::Counter()
-: counter()
-{
-
-}
-
 wuk::crypto::Counter::Counter(const wByte *nonce, wU32 size, wSize begin)
-: counter()
 {
-    if (size >= sizeof(this->counter)) {
+    if (size >= COUNTER_BLOCK_SIZE) {
         throw wuk::Exception(wuk::Error::ERR, "wuk::crypto::Counter::Counter",
                             "Nonce is too long.");
     }
@@ -26,14 +19,12 @@ wuk::crypto::Counter::Counter(const wByte *nonce, wU32 size, wSize begin)
 }
 
 wuk::crypto::Counter::Counter(const char *nonce, wU32 size, wSize begin)
-// Counter -> Counter(wByte *nonce, wU32 size, wSize begin)
 : Counter(reinterpret_cast<const wByte *>(nonce), size, begin)
 {
 
 }
 
 wuk::crypto::Counter::Counter(std::string nonce, wSize begin)
-// Counter -> Counter(const char *nonce, wU32 size, wSize begin)
 : Counter(nonce.c_str(), nonce.size(), begin)
 {
 
@@ -47,4 +38,15 @@ wByte *wuk::crypto::Counter::get() noexcept
 void wuk::crypto::Counter::clean() noexcept
 {
     wuk::memory_zero(this->counter, sizeof(counter));
+}
+
+void wuk::crypto::Counter::step_up() noexcept
+{
+    for (wI32 i = (COUNTER_BLOCK_SIZE - 1); i >= 0; --i) {
+        if (*(this->counter + i) != 0xff) {
+            ++(*(this->counter + i));
+            break;
+        }
+        *(this->counter + i) = 0x00;
+    }
 }

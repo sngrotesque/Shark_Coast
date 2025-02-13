@@ -365,16 +365,11 @@ void wuk::Buffer::append_number(T val)
         wuk::Exception(wuk::Error::ERR, "void wuk::Buffer::append_number",
             "The parameter must be a number.");
     }
-
     wByte buffer[sizeof(T)];
 
     memcpy(buffer, &val, sizeof(T));
     if constexpr (WUK_IS_LITTLE_ENDIAN()) {
-        for (wU32 i = 0; i < (sizeof(T) >> 1); ++i) {
-            const wByte swap = buffer[i];
-            buffer[i] = buffer[sizeof(T) - i - 1];
-            buffer[sizeof(T) - i - 1] = swap;
-        }
+        wuk::reversal_array(buffer, sizeof(T));
     }
 
     this->append(buffer, sizeof(T));

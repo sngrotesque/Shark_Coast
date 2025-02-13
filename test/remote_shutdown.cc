@@ -99,12 +99,6 @@ void remote_shutdown_listen(std::string laddr, wU16 lport)
 {
     wuk::net::Socket fd{AF_INET, SOCK_DGRAM, IPPROTO_UDP};
 
-    SOCKADDR client_info{};
-    socklen_t client_info_len = sizeof(SOCKADDR);
-
-    fd.bind(laddr, lport);
-    std::cout << fd.recvfrom(256, &client_info, &client_info_len) << std::endl;
-
     // fd.sendto("test done.", );
 
 }

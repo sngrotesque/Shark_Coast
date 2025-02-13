@@ -104,6 +104,7 @@ void wuk::crypto::FEA::inv_shift_bits(wByte *block)
     }
 }
 
+// 应考虑优化此函数的混淆性
 void wuk::crypto::FEA::shift_rows(wByte *block)
 {
     wByte swap_array[8], swap;
@@ -311,4 +312,12 @@ void wuk::crypto::FEA::decrypt(wByte *content, wSize size, mode mode)
     }
 }
 
+void wuk::crypto::FEA::set_counter(wuk::crypto::Counter counter)
+{
+    this->counter = counter;
+}
 
+void wuk::crypto::FEA::set_segment_size(wU32 segment_size)
+{
+    this->segmentSize = segment_size;
+}
