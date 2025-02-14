@@ -91,6 +91,7 @@ namespace wuk {
         public:
             void set_counter(wuk::crypto::Counter counter);
             void set_segment_size(wU32 segment_size);
+            const wByte *get_round_key() const;
         };
     }
 }

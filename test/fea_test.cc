@@ -1,6 +1,7 @@
 #include <crypto/WukFEA.hh>
 #include <crypto/WukUtils.hh>
 #include <WukBuffer.hh>
+#include <WukBase64.hh>
 #include <WukPadding.hh>
 #include <WukMisc.hh>
 
@@ -11,6 +12,7 @@
 #include <crypto/WukFEA_CFB.cc>
 #include <crypto/WukUtils.cc>
 #include <WukBuffer.cc>
+#include <WukBase64.cc>
 #include <WukPadding.cc>
 #include <WukMisc.cc>
 
@@ -189,12 +191,10 @@ void test2()
     };
 
     wuk::crypto::FEA fea = build_new_ctx({"SN-Grotesque"}, {salt, sizeof(salt)});
+    wuk::Base64 base64;
 
     char _[] = {
-        "GET / HTTP/1.1\r\n"
-        "Host: sngrotesque.com\r\n"
-        "Accept: */*\r\n"
-        "User-Agent: android\r\n\r\nn"
+        "我爱你啊！"
     };
     wByte *plaintext = reinterpret_cast<wByte *>(_);
     wSize length = strlen(_);
@@ -202,11 +202,30 @@ void test2()
     fea.encrypt(plaintext, length, wuk::crypto::mode::CFB);
 
     wuk::misc::print_hex(plaintext, length, 16, true, false);
+
+    char *ciphertext = base64.encode(plaintext, length);
+    std::cout << ciphertext << std::endl;
+    wuk::m_free(ciphertext);
 }
+
+void roundKey_test()
+{
+    wByte key[32]{};
+    wByte iv[16]{};
+
+    wuk::crypto::FEA fea(key, iv);
+
+    wuk::misc::print_hex(fea.get_round_key(),
+                        wuk::crypto::WUK_FEA_KEYLEN * wuk::crypto::WUK_FEA_NR,
+                        wuk::crypto::WUK_FEA_KEYLEN, true, false);
+}
+
+// python make.py test\fea_test.cc -DWUK_EXPORTS -lbcrypt -lssl -lcrypto
 
 int main()
 {
     try {
+        // roundKey_test();
         test2();
     } catch (wuk::Exception &e) {
         std::cout << e.what() << std::endl;
