@@ -44,7 +44,7 @@ namespace wuk {
         */
         class LIBWUK_API FEA {
         private:
-            wByte iv[WUK_FEA_IVLEN];
+            wByte iv[WUK_FEA_IVLEN]{};
             wByte roundKey[WUK_FEA_KEYLEN * WUK_FEA_NR];
 
             wuk::crypto::Counter counter;

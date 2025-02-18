@@ -4,6 +4,7 @@
 #include <WukBase64.hh>
 #include <WukPadding.hh>
 #include <WukMisc.hh>
+#include <WukTime.hh>
 
 #include <crypto/WukFEA.cc>
 #include <crypto/WukFEA_ECB.cc>
@@ -15,6 +16,7 @@
 #include <WukBase64.cc>
 #include <WukPadding.cc>
 #include <WukMisc.cc>
+#include <WukTime.cc>
 
 #include <iostream>
 #include <filesystem>
@@ -220,13 +222,32 @@ void roundKey_test()
                         wuk::crypto::WUK_FEA_KEYLEN, true, false);
 }
 
+void speed_test()
+{
+    wByte key[32]{}, iv[16]{};
+    wuk::crypto::FEA fea(key, iv);
+    wuk::Time timer;
+    
+    wSize length = 1024 * (1024 * 1024);
+    wByte *content = wuk::m_alloc<wByte *>(length);
+
+    auto start_time = timer.time();
+    fea.encrypt(content, length, wuk::crypto::mode::CTR);
+    auto stop_time = timer.time();
+
+    printf("ciphertext[0]: %02x\n", content[0]);
+
+    printf("Timer: %.4lf\n", (stop_time-start_time));
+
+    wuk::m_free(content);
+}
+
 // python make.py test\fea_test.cc -DWUK_EXPORTS -lbcrypt -lssl -lcrypto
 
 int main()
 {
     try {
-        // roundKey_test();
-        test2();
+        speed_test();
     } catch (wuk::Exception &e) {
         std::cout << e.what() << std::endl;
     }
